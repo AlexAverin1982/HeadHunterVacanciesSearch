@@ -7,7 +7,7 @@ class SearchParameters:
     """
 
     def reset(self) -> None:
-        self.area: int = 113  # whole Russia регион поиска
+        self.__area: int = 113  # whole Russia регион поиска
         self.page_items_count: int = 100  # количество результатов поиска на странице
         self.page: int = 0  # номер страницы для просмотра
         self.search_field: str = ''  # поле поиска ключевого слова
@@ -17,7 +17,7 @@ class SearchParameters:
         self.search_limit = 0  # количество вакасний, которые надо найти
 
     def __init__(self, owner: Any | None = None):
-        self.__area: int | list[int] = 113  # whole Russia
+        self.__area: int = 113  # whole Russia
         self.page_items_count: int = 100
         self.page: int = 0
         self.search_field: str = ''
@@ -30,9 +30,14 @@ class SearchParameters:
         self.search_limit = 0
         self.owner: Any | None = owner
 
+    @property
+    def area(self) -> int:
+        return self.__area
+
+
     def __str__(self):
         result = ""
-        if self.area == 113:
+        if self.__area == 113:
             result = "Регион поиска вакансий: вся Россия\n"
         else:
             result = f"Регион поиска вакансий: {self.__area_name}\n"
@@ -62,7 +67,7 @@ class SearchParameters:
         return result
 
     def params(self) -> dict:
-        result = {'area': self.area,
+        result = {'area': self.__area,
                   'page': self.page,
                   'per_page': self.page_items_count}
         if self.text:
@@ -79,8 +84,11 @@ class SearchParameters:
     # def set_key_words(self, key_words: list[str]):
     #     words = ', '.join(key_words)
 
-    def set_area(self, new_area_code: int):
+    @area.setter
+    def area(self, new_area_code: int):
         from src.hh_dictionaries_class import HeadHunterApiDictionaries
         if HeadHunterApiDictionaries.area_code_is_valid(new_area_code):
             self.__area = new_area_code
+        else:
+            raise ValueError
 

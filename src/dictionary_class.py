@@ -5,9 +5,13 @@ import json
 class Dictionary:
     def __init__(self, name: str):
         def add_this_sub_area(area_data: dict):
-            self.items[area_data.get('id', 0)] = area_data.get('name', '')
-            for subitem in area_data.get('areas', []):
-                add_this_sub_area(subitem)
+            result = {}
+            area_id = area_data.get('id', '')
+            area_name = area_data.get('name', '')
+            if area_id + area_name:
+                result[area_id] = {'name': area_name, 'areas': []}
+                result[area_id]['areas'] = [add_this_sub_area(subitem) for subitem in area_data.get('areas', [])]
+            return result
 
         self.name: str = name
         req = requests.get('https://api.hh.ru/'+name)
@@ -17,9 +21,8 @@ class Dictionary:
             req.close()
 
             if name == 'areas':
-                self.items = {}
-                for item in dict_data:
-                    add_this_sub_area(item)
+                self.items = [add_this_sub_area(item) for item in dict_data]
+                print(self.items)
             else:
                 dict_data = dict_data.get('categories', [])
                 self.items = [item for item in dict_data]

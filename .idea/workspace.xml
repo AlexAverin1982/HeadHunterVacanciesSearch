@@ -4,7 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="start working" />
+    <list default="true" id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="start working">
+      <change afterPath="$PROJECT_DIR$/.env.template.env" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.flake8" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/mypy.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/areas_reference_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/application_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/application_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dictionary_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/dictionary_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hh_dictionaries_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hh_dictionaries_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/search_parameters_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_parameters_class.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -38,17 +52,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/phase__0"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -70,6 +85,7 @@
     </configuration>
     <configuration name="search_parameters_class" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -91,8 +107,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.search_parameters_class" />
         <item itemvalue="Python.main" />
+        <item itemvalue="Python.search_parameters_class" />
         <item itemvalue="Python.search_parameters_class" />
         <item itemvalue="Python.main" />
         <item itemvalue="Python.search_parameters_class" />
@@ -159,6 +175,16 @@
           <url>file://$PROJECT_DIR$/src/search_engine_class.py</url>
           <line>16</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/hh_dictionaries_class.py</url>
+          <line>24</line>
+          <option name="timeStamp" value="18" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/dictionary_class.py</url>
+          <line>24</line>
+          <option name="timeStamp" value="22" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

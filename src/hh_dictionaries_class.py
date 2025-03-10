@@ -18,3 +18,13 @@ class HeadHunterApiDictionaries:
                 return new_area_code in area_dict.items.keys()
             else:
                 return False
+
+    @classmethod
+    def list_of_areas(cls, parent_area: int = 0, sort_by_code: bool = True):
+        result = []
+        if not cls.__dictionaries.get('areas'):
+            cls.init_dictionary('areas')
+        if parent_area:
+            pass
+        else:
+            result = cls.__dictionaries['areas']

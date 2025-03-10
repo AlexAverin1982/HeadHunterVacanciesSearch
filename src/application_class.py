@@ -9,13 +9,13 @@ from src.vacancy_class import Vacancy
 
 class Application:
     work_is_over: bool = False
-    __dictionaries = {}
 
     @classmethod
     def terminate(cls):
         cls.work_is_over = True
 
     def __init__(self):
+
         self.search_params = SearchParameters()
         self.search_engine = VacanciesSearchEngine()
         self.vacancies = []
@@ -75,6 +75,7 @@ class Application:
             self.search_params.page_items_count = search_limit
 
     def set_search_area(self) -> None:
+        from hh_dictionaries_class import HeadHunterApiDictionaries
         print('Как вы хотите указать регион?')
         print('1. Ввести код региона')
         print('2. Выбрать код региона из списка всех регионов')
@@ -82,7 +83,6 @@ class Application:
         print('4. Отменить выбор')
 
         valid_input = False
-        new_area = 113 # вся Россия
         user_response = 4
         while not valid_input:
             try:
@@ -96,14 +96,16 @@ class Application:
                 print('Введите 1, 2, 3 или 4')
         if user_response == 1:
             valid_input = False
-            new_area = 113  # вся Россия
             while not valid_input:
                 try:
-                    new_area = int(input('Введите код региона (113 - вся Россия): '))
+                    self.search_params.area = int(input('Введите код региона (113 - вся Россия): '))
                     valid_input = True
                 except ValueError:
-                    print('Введите целое число')
-            self.search_params.area = new_area
+                    print('Введен неверный код')
+        if user_response == 2:
+            print('Выберите регион: ')
+
+            HeadHunterApiDictionaries.list_of_areas()
         elif user_response == 4:
             return
 
@@ -151,7 +153,7 @@ class Application:
         self.current_menu = self.menus['main_menu']
 
     def run(self) -> None:
-        self.search_params.set_area(10)
+        self.search_params.area = 10
         while not Application.work_is_over:
 
             self.show_current_menu()
