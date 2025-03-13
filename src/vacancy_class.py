@@ -1,9 +1,13 @@
+from time import strptime
+from datetime import datetime as datetime
 from typing_extensions import Self
-
+from copy import copy
 from src.recordset_class import RecordSet
 
 
 class Vacancy(RecordSet):
+    headers: list[str] = []
+
     def __init__(self, fields: dict):
         super().__init__()
 
@@ -12,13 +16,15 @@ class Vacancy(RecordSet):
         salary_desc = ''
 
         salary_data = fields.get('salary', {})
+        currency = 'руб.'
         if salary_data:
             if isinstance(salary_data, dict):
-                salary = salary_data.get('from', '')
+                salary = salary_data.get('from', 0)
                 salary_desc = salary_data.get('gross', True)
                 if salary_desc:
                     salary_desc = 'до вычета'
-                salary_max = salary_data.get('to', '')
+                salary_max = salary_data.get('to', 0)
+                currency = salary_data.get('currency', 'руб.').replace('RUR', 'руб.')
             else:
                 print(salary_data)
 
@@ -37,7 +43,6 @@ class Vacancy(RecordSet):
         else:
             salary_desc = ''
 
-
         snippet = fields.get('snippet', {})
         contacts = fields.get('contacts', {})
         professional_roles = fields.get('professional_roles')
@@ -53,45 +58,91 @@ class Vacancy(RecordSet):
         else:
             address = ''
 
-        self.properties.update({'id': {'value': fields.get('id', '')},
+        work_format = fields.get('work_format')
+        if work_format:
+            if isinstance(work_format, list):
+                formats = [item['name'].replace('\xa0', ' ') for item in work_format]
+                work_format = {'name': ' или '.join(formats)}
+            else:
+                print(work_format)
+        else:
+            work_format = {}
+
+        published_at = fields.get('published_at', '')
+        if published_at:
+            try:
+                if isinstance(published_at, str):
+                    p = published_at.find('T')
+                    if p > 0:
+                        published_at = {
+                            'value': datetime.strftime(datetime.strptime(published_at[:p], '%Y-%m-%d'), '%d %B %Y')}
+                    else:
+                        print(published_at)
+                else:
+                    print(published_at)
+            except ValueError:
+                published_at = {}
+        else:
+            published_at = {}
+
+        self.properties.update({'id': {'value': fields.get('id', ''), 'display_order': 0},
                                 'area': {'id': fields.get('area', {}).get('id', ''),
                                          'value': fields.get('area', {}).get('name', ''),
                                          'representation': 'Регион'},
                                 'name': {'value': fields.get('name', ''),
-                                         'representation': 'Вакансия'},
+                                         'representation': 'Вакансия', 'display_order': 2},
                                 'has_test': {'value': fields.get('has_test', False),
                                              'representation': 'Наличие испытательного срока'},
                                 'url': {'value': fields.get('alternate_url', ''),
-                                        'representation': 'Ссылка'},
+                                        'representation': 'Ссылка', 'display_order': 1},
                                 'address': {'value': address,
                                             'representation': 'Адрес'},
                                 'salary': {'value': salary,
-                                               'representation': 'Зарплата от',
-                                               'suffix': salary_desc},
+                                           'representation': 'Зарплата от',
+                                           'addendum': 'currency',
+                                           'suffix': salary_desc, 'display_order': 3},
                                 'salary_max': {'value': salary_max,
-                                               'representation': 'до',},
-                                'published_at': {'value': fields.get('published_at', ''),
+                                               'representation': 'до',
+                                               'addendum': 'currency',
+                                               'display_order': 4},
+                                'currency': {'value': currency, 'representation': 'Валюта зарплаты',
+                                             'display_order': 4},
+                                'published_at': {'value': published_at.get('value', ''),
                                                  'representation': 'Дата публикации'},
                                 'archived': {'value': fields.get('archived', False),
                                              'representation': 'Находится в архиве'},
                                 'employer': {'id': fields.get('employer', {}).get('id', ''),
                                              'value': fields.get('employer', {}).get('name', ''),
-                                             'representation': 'Работодатель'},
+                                             'representation': 'Работодатель', 'display_order': 5},
                                 'requirement': {'value': snippet.get('requirement', ''),
-                                                'representation': 'Требования'},
+                                                'representation': 'Требования',
+                                                'display_order': 7},
                                 'responsibility': {'value': snippet.get('responsibility', ''),
-                                                   'representation': 'Обязанности'},
+                                                   'representation': 'Обязанности',
+                                                   'display_order': 8},
                                 # 'schedule': {'value', fields.get('schedule', {}).get('name', ''),
                                 #              'representation': ''},
-                                # 'work_format': {'value': fields.get('work_format', {}).get('name', '')},
+                                'work_format': {'value': work_format.get('name', ''),
+                                                'representation': 'Вид работы'},
                                 # 'working_hours': {'value': fields.get('working_hours', {}).get('name', '')},
                                 # 'working_schedule_by_days': {
                                 #     'value': fields.get('working_schedule_by_days', {}).get('name', '')},
-                                # 'employment_form': {'value': fields.get('employment_form', {}).get('name', '')},
+                                'employment_form': {'value': fields.get('employment_form', {}).get('name', ''),
+                                                    'representation': 'Занятость',
+                                                    'display_order': 9
+                                                    },
                                 'experience': {'value': fields.get('experience', {}).get('name', ''),
-                                               'representation': 'Требуемый опыт'},
-                                # 'professional_role': professional_role.get('name', '')
+                                               'representation': 'Требуемый опыт',
+                                               'display_order': 6},
+                                'professional_role': {'value': professional_role.get('name', ''),
+                                                      'id': professional_role.get('id', ''),
+                                                      'representation': 'Профессия'}
                                 })
+
+        prop_names = self.properties.keys()
+        prop_names = sorted(prop_names, key=lambda x: self.properties[x].get('display_order', 999))
+        if len(prop_names) > len(Vacancy.headers):
+            Vacancy.headers = prop_names
 
         self.display_props = ['name', 'salary', 'employer', 'experience', 'url']
         # if isinstance(fields, dict):
@@ -113,6 +164,7 @@ class Vacancy(RecordSet):
         self.experience = fields.get('experience', {}).get('name', 'не имеет значения').lower()
         self.employer = fields.get('employer', {}).get('name', 'не указан')
         """
+
     def __str__(self):
         result = ""
 
@@ -121,13 +173,18 @@ class Vacancy(RecordSet):
                 continue
             prop = self.properties[property_name]
             val = str(prop.get('value', ''))
+            addendum = prop.get('addendum')
+            if addendum:
+                addendum = ' ' + str(self.properties[addendum].get('value', ''))
             if val == '':
                 continue
             if prop.get('representation'):
                 result += f"{prop['representation']}: "
                 # val = str(prop.get('value', 'значение не указано'))
-                    # val = 'значение не указано'
+                # val = 'значение не указано'
                 result += val
+                if addendum:
+                    result += addendum
                 result += f" {prop.get('suffix', '')}; "
 
         return result.replace(' ; ', '; ')
@@ -138,6 +195,8 @@ class Vacancy(RecordSet):
 
     def __eq__(self, other: Self | int) -> bool:
         self_salary = self.properties.get('salary', {}).get('value', 0)
+        if self_salary == '':
+            self_salary = 0
         if isinstance(other, Vacancy):
             other_salary = other.properties.get('salary', {}).get('value', 0)
         elif isinstance(other, int):
@@ -164,6 +223,8 @@ class Vacancy(RecordSet):
 
     def __lt__(self, other) -> bool:
         self_salary = self.properties.get('salary', {}).get('value', 0)
+        if (self_salary == '') or (self_salary == 0):
+            return True
         if isinstance(other, Vacancy):
             other_salary = other.properties.get('salary', {}).get('value', 0)
         elif isinstance(other, int):
@@ -174,3 +235,37 @@ class Vacancy(RecordSet):
 
     def __le__(self, other: Self) -> bool:
         return self.__eq__(other) or self.__lt__(other)
+
+    def details(self) -> str:
+        result = ''
+        prop_names = self.properties.keys()
+        prop_names = sorted(prop_names, key=lambda x: self.properties[x].get('display_order', 999))
+        for name in prop_names:
+            representation = self.properties[name].get('representation')
+            value = self.properties[name].get('value')
+            if not value:
+                continue
+            if representation:
+                result += f"{representation}: {value}\n"
+            else:
+                result += f"{name}: {value}\n"
+        return result
+
+    def as_xml(self) -> str:
+        result = ''
+        return result
+
+    def as_json(self) -> str:
+        result = ''
+        return result
+
+    def as_csv(self, separator: str = ';') -> str:
+        result = []
+        if Vacancy.headers:
+            for prop_name in Vacancy.headers:
+                result.append(str(self.properties.get(prop_name, {}).get('value', '')))
+            result = separator.join(result)
+        else:
+            return ''
+        return result
+

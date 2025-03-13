@@ -1,4 +1,5 @@
 # from src.dictionary_class import Dictionary
+import os
 from msvcrt import getch
 
 from src.display_options_class import DisplayOptions
@@ -8,6 +9,7 @@ from src.search_parameters_class import SearchParameters
 from src.sort_parameters_class import SortParameter
 from src.vacancy_class import Vacancy
 from src.hh_reference_class import HeadHunterReference as HhRef
+from src.misc_tools import get_indices
 
 
 class Application:
@@ -101,7 +103,7 @@ class Application:
         print('\n')
         input('Нажмите Enter')
 
-    def delete_vacancies(self):
+    def delete_vacancies(self) -> None:
         print('Введите номера вакансий, которые вы хотите удалить из списка.')
         print('Номера можно указывать через запятую, или тире для указания диапазона')
         print('Диапазоны также можно указывать через запятую')
@@ -109,35 +111,30 @@ class Application:
         indices_str = input('Ваш выбор: ')
         if not indices_str:
             return
-        indices_list = indices_str.split(',')
-        indices = []
-        for index  in indices_list:
-            if index.strip().isdigit():
-                indices.append(int(index.strip()) - 1)
-            elif index.find('-') > -1:
-                p = index.find('-')
-                start = index[:p]
-                if not start:
-                    start = 0
-                elif start.strip().isdigit():
-                    start = int(start.strip()) - 1
-                else:
-                    continue
-                end = index[p + 1:]
-                if not end:
-                    end = len(self.vacancies)
-                elif end.strip().isdigit():
-                    end = min(int(end.strip()) - 1, len(self.vacancies))
-                else:
-                    continue
-                indices.extend(range(start, end + 1))
-        indices = sorted(indices, reverse=True)
+
+        indices = sorted(get_indices(indices_str, len(self.vacancies)), reverse=True)
         for i in indices:
             del self.vacancies[i]
 
-
     def show_details(self) -> None:
-        print('Еще в разработке')
+        print('1. Показать подробно все вакансии.')
+        print('2. Показать подробно только выбранные вакансии.')
+        user_response = input('Ваш выбор: ')
+        if user_response == '1':
+            indices = range(len(self.vacancies))
+        else:
+            print('Введите номера вакансий из списка найденных, которые вы хотите просмотреть.')
+            print('Номера можно указывать через запятую, или тире для указания диапазона')
+            print('Диапазоны также можно указывать через запятую')
+            print('Введите пустую строку для отмены удаления')
+            indices_str = input('Ваш выбор: ')
+            if not indices_str:
+                return
+
+            indices = get_indices(indices_str, len(self.vacancies))
+
+        for ind in indices:
+            print(self.vacancies[ind].details())
         input('Нажмите Enter')
 
     def sort_vacancies_list(self) -> None:
@@ -145,21 +142,68 @@ class Application:
         input('Нажмите Enter')
 
     def save_vacancies_to_file(self) -> None:
-        print('Еще в разработке')
-        input('Нажмите Enter')
+        while True:
+            print('Выберите формат файла: ')
+            print('1. TXT')
+            print('2. CSV')
+            print('3. JSON')
+            print('4. XLSX')
+            user_response = input('Ваш выбор: ')
+            if user_response.isdigit() and int(user_response.isdigit()) in range(5):
+                break
+            print('Такого пункта меню нет')
 
+        filename = input('Введите имя файла (введите пустую строку для отмены): ')
+        if not filename:
+            return
+
+        par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+        par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
+        data_dir = os.path.join(par_dir, "data")
+        print(f'Файл будет сохранен в каталоге {data_dir}')
+        filename = os.path.join(data_dir, filename)
+        content = ''
+        if user_response == '1':
+            if not filename.lower().endswith('.txt'):
+                filename += '.txt'
+
+            for vacancy in self.vacancies:
+                content += vacancy.details()
+                content += '-' * 100
+                content += '\n'
+        elif user_response == '2':
+            separator = ';'
+            if not filename.lower().endswith('.csv'):
+                filename += '.csv'
+
+            content = separator.join(Vacancy.headers)+'\n'
+            for vacancy in self.vacancies:
+                content += vacancy.as_csv(separator)
+                # content += '-' * 100
+                content += '\n'
+
+        if content:
+            with open(filename, 'w') as f:
+                try:
+                    f.write(content)
+                except:                 # IOError
+                    print(f'Не удалось сохранить данные в файл {filename}')
+                else:
+                    print(f'Файл {filename} успешно сохранен.')
+        input('Нажмите Enter')
 
     def find_vacancies(self) -> None:
         """
         Ищем вакансии по текущим параметрам
         """
+        user_response = '1'
         if len(self.vacancies):
             print('Очистить текущий список вакансий?')
             print('1. Да, очистить результаты поиска.')
             print('2. Нет, объединить новые результаты поиска с уже существующими.')
             user_response = input('Ваш выбор :')
 
-            if user_response == 1:
+            if user_response == '1':
                 self.menus['main_menu'].delete_item('Просмотреть найденные вакансии')
                 self.menus['main_menu'].delete_item('Отфильтровать найденные вакансии')
                 self.menus['main_menu'].delete_item('Отсортировать найденные вакансии')
@@ -194,14 +238,16 @@ class Application:
 
             # self.vacancies_by_id[vac.id] = len(self.vacancies) - 1
 
-        if len(self.vacancies):
+        if len(self.vacancies) and (user_response == '1'):
             self.menus['main_menu'].add_item('Просмотреть найденные вакансии', 2, self.show_vacancies_list)
             self.menus['main_menu'].add_item('Показать вакансии детально', 3, self.show_details)
             self.menus['main_menu'].add_item('Отфильтровать найденные вакансии', 4, self.filter_found_vacancies)
             self.menus['main_menu'].add_item('Отсортировать найденные вакансии', 5, self.sort_vacancies_list)
             self.menus['main_menu'].add_item('Удалить вакансии из результатов поиска', 6, self.delete_vacancies)
-            self.menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.show_vacancies_list)
+            self.menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.save_vacancies_to_file)
             self.menus['main_menu'].add_item('Топ N вакансий по зарплате', 8, self.show_top)
+
+        self.return_to_main_menu()
 
     # ('Просмотреть найденные вакансии', self.show_vacancies_list),
     # ('Отфильтровать найденные вакансии', self.find_vacancies),
@@ -234,6 +280,7 @@ class Application:
             except ValueError:
                 print('Введен неверный код')
         input('Нажмите Enter')
+        self.return_to_previous_menu()
 
     def search_area_by_substring(self):
         substring = input('Введите часть наименования региона: ').lower()
@@ -277,7 +324,9 @@ class Application:
         print(areas)
 
     def set_search_area(self) -> None:
+        self.previous_menu = self.current_menu
         self.current_menu = self.menus['select_area']
+
         #
         # valid_input = False
         # user_response = 4
@@ -377,17 +426,17 @@ class Application:
                       'change_search_params': Menu('Укажите параметры поиска:',
                                                    [('Указать регион', self.set_search_area),
                                                     ('Указать минимальную зарплату', self.set_min_salary),
+                                                    ('Указать подстроку для поиска', self.set_search_substring),
                                                     # ('Указать максимальную зарплату', Application.terminate),
-                                                    ('Указать число вакансий', self.set_search_limit),
+                                                    ('Указать максимальное число вакансий', self.set_search_limit),
                                                     ('Указать отрасль', Application.terminate),
                                                     ('Указать профессию', Application.terminate),
-                                                    ('Указать подстроку для поиска', self.set_search_substring),
                                                     ('Уточнить поиск вакансий без зарплаты',
                                                      self.set_igore_without_salary),
                                                     # ('Указать поле для поиска подстроки', Application.terminate),
                                                     ('Установить параметры поика по умолчанию', Application.terminate),
                                                     ('Вернуться в главное меню', self.return_to_main_menu),
-                                                    ('Выйти из программы', Application.terminate)
+                                                    ('Искать вакансии', self.find_vacancies)
                                                     ]
                                                    ),
                       'select_area': Menu('Как вы хотите указать регион?',
@@ -402,6 +451,7 @@ class Application:
                                            ('Вернуться в прежнее меню', self.return_to_previous_menu),
                                            ('Отменить выбор региона', self.change_search_params),
                                            ('Вернуться в главное меню', self.return_to_main_menu),
+                                           ('Вернуться в предыдущее меню', self.return_to_previous_menu),
                                            ('Выйти из программы', Application.terminate)
                                            ])
 
@@ -428,18 +478,21 @@ class Application:
     #         self.menus[menu_name].add_item(item_name, pos, function)
 
     def run(self) -> None:
-        self.search_params.set_property(property_name='area', id='8')
+        self.search_params.set_property(property_name='area', id='113')
         # self.search_params.area = 11
         # from src.professions_reference_class import ProfessionsReference
         # ProfessionsReference.init()
 
         while not Application.work_is_over:
-
             self.show_current_menu()
-            user_response = input('Ваш выбор: ')
-            if user_response.isdigit():
-                user_response = int(user_response) - 1
-                self.current_menu.items[user_response][1]()
+            while True:
+                user_response = input('Ваш выбор: ')
+                try:
+                    user_response = int(user_response) - 1
+                    self.current_menu.items[user_response][1]()
+                    break
+                except IndexError:
+                    print('Такого пункта в меню нет.')
 
     # def sort_vacancies(self):
     #     for sort_param in self.sort_parameters:

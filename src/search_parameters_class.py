@@ -9,14 +9,14 @@ class SearchParameters(RecordSet):
     """
 
     # def reset(self) -> None:
-        # self.__area: int = 113  # whole Russia регион поиска
-        # self.page_items_count: int = 100  # количество результатов поиска на странице
-        # self.page: int = 0  # номер страницы для просмотра
-        # self.search_field: str = ''  # поле поиска ключевого слова
-        # self.experience: str = ''  # требуемый опыт работы
-        # self.text: str = ''  # ключевое слово для поиска
-        # self.employment: str = ''  # тип занятости
-        # self.search_limit = 0  # количество вакасний, которые надо найти
+    # self.__area: int = 113  # whole Russia регион поиска
+    # self.page_items_count: int = 100  # количество результатов поиска на странице
+    # self.page: int = 0  # номер страницы для просмотра
+    # self.search_field: str = ''  # поле поиска ключевого слова
+    # self.experience: str = ''  # требуемый опыт работы
+    # self.text: str = ''  # ключевое слово для поиска
+    # self.employment: str = ''  # тип занятости
+    # self.search_limit = 0  # количество вакасний, которые надо найти
 
     def __init__(self):
         super().__init__()
@@ -36,9 +36,14 @@ class SearchParameters(RecordSet):
                                                  'do_not_use_in_search': 'uhuh'},
                                 'ignore_without_salary': {'value': True,
                                                           'representation': 'Игнорировать вакансии без зарплаты',
-                                                          'do_not_use_in_search': 'uhuh'}
+                                                          'do_not_use_in_search': 'uhuh'},
+                                'auto_convert_to_rur': {'value': False,
+                                                        'representation':
+                                                            'Конвертировать зарплату в рубли автоматически',
+                                                        'do_not_use_in_search': 'uhuh'}
                                 })
 
+        del self.properties['salary_max']
 
     def params(self) -> dict:
         result = {}
