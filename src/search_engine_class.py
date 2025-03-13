@@ -14,11 +14,16 @@ class VacanciesSearchEngine:
         #     'page': 10,         # Номер страницы
         #     'per_page': 100       # Кол-во вакансий на 1 странице
         # }
+        del search_params['page']
         result = []
         page = 0
+        params = ''
+        for name, value in search_params.items():
+            params += f"{name}={value}&"
         while True:
-            search_params['page'] = page
-            req = requests.get('https://api.hh.ru/vacancies', search_params)
+            # search_params['page'] = page
+            params1 = params + f"page={page}"
+            req = requests.get(f'https://api.hh.ru/vacancies?{params1}')
             if req.ok:
                 data_str = req.content.decode()
                 vac_data = json.loads(data_str)

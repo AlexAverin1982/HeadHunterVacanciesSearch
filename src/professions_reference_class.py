@@ -1,7 +1,7 @@
 import requests
 import json
 
-class AreaReference:
+class ProfessionsReference:
     areas_tree_by_name: dict = {}
     areas_tree_by_id: dict = {}
     all_areas_dict_by_name = {}
@@ -22,7 +22,7 @@ class AreaReference:
                                       parent_dict_by_name[area_name]['areas'],
                                       parent_dict_by_id[area_id]['areas'])
 
-        req = requests.get('https://api.hh.ru/areas')
+        req = requests.get('https://api.hh.ru/professional_roles')
         if req.ok:
             data_str = req.content.decode()
             dict_data = json.loads(data_str)
