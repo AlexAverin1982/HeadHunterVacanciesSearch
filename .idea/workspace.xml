@@ -5,11 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="area reference">
-      <change afterPath="$PROJECT_DIR$/src/misc_tools.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/fetcher_class.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/json_file_manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/storage_manager_class.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/text_file_manager_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/application_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/application_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_parameters_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_parameters_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/search_engine_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_engine_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vacancy_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vacancy_class.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -60,15 +64,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feature/phase__0&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/python/skypro/HeadHunterVacanciesSearch/src&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.main.executor": "Debug",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "feature/phase__0",
+    "last_opened_file_path": "D:/python/skypro/HeadHunterVacanciesSearch/src"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\python\skypro\HeadHunterVacanciesSearch\src" />
@@ -77,6 +81,7 @@
   <component name="RunManager" selected="Python.main">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -98,6 +103,7 @@
     </configuration>
     <configuration name="search_parameters_class" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
+      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -203,47 +209,9 @@
           <option name="timeStamp" value="22" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/application_class.py</url>
-          <line>55</line>
-          <option name="timeStamp" value="48" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <condition expression="address is not None" language="Python" />
           <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>58</line>
-          <option name="timeStamp" value="53" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>28</line>
-          <option name="timeStamp" value="54" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <condition expression="not isinstance(salary_desc, str)" language="Python" />
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>41</line>
-          <option name="timeStamp" value="58" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <condition expression="(professional_roles is not None) and (len(professional_roles) &gt; 1)" language="Python" />
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>48</line>
-          <option name="timeStamp" value="78" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>66</line>
-          <option name="timeStamp" value="82" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>79</line>
-          <option name="timeStamp" value="89" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>81</line>
-          <option name="timeStamp" value="90" />
+          <line>257</line>
+          <option name="timeStamp" value="92" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -255,11 +223,7 @@
       </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="self.properties.get('salary', {}).get('value', 0)" language="Python" />
-        <watch expression="self.properties.keys()" language="Python" />
-      </configuration>
-      <inline-watch fileUrl="file://$PROJECT_DIR$/src/application_class.py" line="228">
+      <inline-watch fileUrl="file://$PROJECT_DIR$/src/application_class.py" line="256">
         <watch expression="vac.salary_specified()" />
       </inline-watch>
     </watches-manager>

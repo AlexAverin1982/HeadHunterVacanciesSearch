@@ -6,7 +6,7 @@ class VacanciesSearchEngine:
     def __init__(self):
         pass
 
-    def find_vacancies_with_parameters(self, search_params: dict, search_limit: int = 0) -> list:
+    def fetch(self, search_params: dict, search_limit: int = 0) -> list:
         # взято с https://habr.com/ru/articles/666062/
         # search_params = {
         #     #'employer_id': 3529,  # ID 2ГИС

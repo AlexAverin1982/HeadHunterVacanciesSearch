@@ -1,9 +1,8 @@
-from time import strptime
 from datetime import datetime as datetime
-from typing_extensions import Self
-from copy import copy
+from typing_extensions import Self, Any
 from src.recordset_class import RecordSet
 
+from json import JSONEncoder
 
 class Vacancy(RecordSet):
     headers: list[str] = []
@@ -166,6 +165,7 @@ class Vacancy(RecordSet):
         """
 
     def __str__(self):
+
         result = ""
 
         for property_name in self.display_props:
@@ -188,6 +188,9 @@ class Vacancy(RecordSet):
                 result += f" {prop.get('suffix', '')}; "
 
         return result.replace(' ; ', '; ')
+
+    def to_dict(self) -> Any:
+        return self.__dict__
 
     def salary_specified(self) -> bool:
         # return self.properties.get('salary', {}).get('value', '') != ''
@@ -251,21 +254,23 @@ class Vacancy(RecordSet):
                 result += f"{name}: {value}\n"
         return result
 
-    def as_xml(self) -> str:
-        result = ''
-        return result
-
-    def as_json(self) -> str:
-        result = ''
-        return result
-
-    def as_csv(self, separator: str = ';') -> str:
-        result = []
-        if Vacancy.headers:
-            for prop_name in Vacancy.headers:
-                result.append(str(self.properties.get(prop_name, {}).get('value', '')))
-            result = separator.join(result)
-        else:
-            return ''
-        return result
+    def default(self, o):
+        return o.__dict__
+    # def as_xml(self) -> str:
+    #     result = ''
+    #     return result
+    #
+    # def as_json(self) -> str:
+    #     result = ''
+    #     return result
+    #
+    # def as_csv(self, separator: str = ';') -> str:
+    #     result = []
+    #     if Vacancy.headers:
+    #         for prop_name in Vacancy.headers:
+    #             result.append(str(self.properties.get(prop_name, {}).get('value', '')))
+    #         result = separator.join(result)
+    #     else:
+    #         return ''
+    #     return result
 

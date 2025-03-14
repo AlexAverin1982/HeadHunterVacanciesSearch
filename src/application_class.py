@@ -1,15 +1,18 @@
 # from src.dictionary_class import Dictionary
 import os
 from msvcrt import getch
+import json
 
 from src.display_options_class import DisplayOptions
 from src.menu_class import Menu
 from src.search_engine_class import VacanciesSearchEngine
 from src.search_parameters_class import SearchParameters
 from src.sort_parameters_class import SortParameter
+from src.text_file_manager_class import TextFileManager
 from src.vacancy_class import Vacancy
 from src.hh_reference_class import HeadHunterReference as HhRef
 from src.misc_tools import get_indices
+from src.json_file_manager import JSONFileManager
 
 
 class Application:
@@ -148,8 +151,8 @@ class Application:
             print('2. CSV')
             print('3. JSON')
             print('4. XLSX')
-            user_response = input('Ваш выбор: ')
-            if user_response.isdigit() and int(user_response.isdigit()) in range(5):
+            filetype_choice = input('Ваш выбор: ')
+            if filetype_choice.isdigit() and int(filetype_choice.isdigit()) in range(5):
                 break
             print('Такого пункта меню нет')
 
@@ -161,17 +164,19 @@ class Application:
         par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
         data_dir = os.path.join(par_dir, "data")
         print(f'Файл будет сохранен в каталоге {data_dir}')
-        filename = os.path.join(data_dir, filename)
+        # full_filename = os.path.join(data_dir, filename)
+        file_manager = None
+
         content = ''
-        if user_response == '1':
-            if not filename.lower().endswith('.txt'):
-                filename += '.txt'
+        if filetype_choice == '1':
+            file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
 
             for vacancy in self.vacancies:
                 content += vacancy.details()
                 content += '-' * 100
                 content += '\n'
-        elif user_response == '2':
+
+        elif filetype_choice == '2':
             separator = ';'
             if not filename.lower().endswith('.csv'):
                 filename += '.csv'
@@ -182,14 +187,37 @@ class Application:
                 # content += '-' * 100
                 content += '\n'
 
-        if content:
-            with open(filename, 'w') as f:
-                try:
-                    f.write(content)
-                except:                 # IOError
-                    print(f'Не удалось сохранить данные в файл {filename}')
+        elif filetype_choice == '3':
+
+            file_manager = JSONFileManager(storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict)
+            content = {"items": self.vacancies}
+
+        if file_manager and content:
+            if os.path.exists(file_manager.full_filename()):
+                print('Указанный файл существует. Что нужно сделать?')
+                print('1. Дозаписать данные, сохранив уже записанные.')
+                print('2. Перезаписать файл полностью.')
+                print('3. Отменить сохранение.')
+                write_mode_choice = input('Ваш выбор :')
+
+                if write_mode_choice == '1':
+                    append = True
+                elif write_mode_choice == '2':
+                    append = False
                 else:
-                    print(f'Файл {filename} успешно сохранен.')
+                    return
+            else:
+                append = False
+
+            file_manager.save(content=content, append=append)
+
+        #         try:
+        #             f.write(content)
+        #         except:                 # IOError
+        #             print(f'Не удалось сохранить данные в файл {filename}')
+        #         else:
+        #             print(f'Файл {filename} успешно сохранен.')
+        print('Сохранение завершено.')
         input('Нажмите Enter')
 
     def find_vacancies(self) -> None:
@@ -214,7 +242,7 @@ class Application:
                 self.vacancies_by_id = {}
 
         print('Ищем...')
-        vac_data = self.search_engine.find_vacancies_with_parameters(self.search_params.params(),
+        vac_data = self.search_engine.fetch(self.search_params.params(),
                                                                      self.search_params.properties.get('search_limit',
                                                                                                        {}).get('value',
                                                                                                                0))
