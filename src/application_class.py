@@ -181,7 +181,7 @@ class Application:
             if not filename.lower().endswith('.csv'):
                 filename += '.csv'
 
-            content = separator.join(Vacancy.headers)+'\n'
+            content = separator.join(Vacancy.headers) + '\n'
             for vacancy in self.vacancies:
                 content += vacancy.as_csv(separator)
                 # content += '-' * 100
@@ -220,6 +220,23 @@ class Application:
         print('Сохранение завершено.')
         input('Нажмите Enter')
 
+    def shrink_main_menu(self):
+        self.menus['main_menu'].delete_item('Просмотреть найденные вакансии')
+        self.menus['main_menu'].delete_item('Отфильтровать найденные вакансии')
+        self.menus['main_menu'].delete_item('Отсортировать найденные вакансии')
+        self.menus['main_menu'].delete_item('Сохранить найденные вакансии в файл')
+        self.menus['main_menu'].delete_item('Топ N вакансий по зарплате')
+        self.menus['main_menu'].delete_item('Удалить вакансии из результатов поиска')
+
+    def extend_main_menu(self):
+        self.menus['main_menu'].add_item('Просмотреть найденные вакансии', 2, self.show_vacancies_list)
+        self.menus['main_menu'].add_item('Показать вакансии детально', 3, self.show_details)
+        self.menus['main_menu'].add_item('Отфильтровать найденные вакансии', 4, self.filter_found_vacancies)
+        self.menus['main_menu'].add_item('Отсортировать найденные вакансии', 5, self.sort_vacancies_list)
+        self.menus['main_menu'].add_item('Удалить вакансии из результатов поиска', 6, self.delete_vacancies)
+        self.menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.save_vacancies_to_file)
+        self.menus['main_menu'].add_item('Топ N вакансий по зарплате', 8, self.show_top)
+
     def find_vacancies(self) -> None:
         """
         Ищем вакансии по текущим параметрам
@@ -232,20 +249,15 @@ class Application:
             user_response = input('Ваш выбор :')
 
             if user_response == '1':
-                self.menus['main_menu'].delete_item('Просмотреть найденные вакансии')
-                self.menus['main_menu'].delete_item('Отфильтровать найденные вакансии')
-                self.menus['main_menu'].delete_item('Отсортировать найденные вакансии')
-                self.menus['main_menu'].delete_item('Сохранить найденные вакансии в файл')
-                self.menus['main_menu'].delete_item('Топ N вакансий по зарплате')
-                self.menus['main_menu'].delete_item('Удалить вакансии из результатов поиска')
+                self.shrink_main_menu()
                 self.vacancies = []
                 self.vacancies_by_id = {}
 
         print('Ищем...')
         vac_data = self.search_engine.fetch(self.search_params.params(),
-                                                                     self.search_params.properties.get('search_limit',
-                                                                                                       {}).get('value',
-                                                                                                               0))
+                                            self.search_params.properties.get('search_limit',
+                                                                              {}).get('value',
+                                                                                      0))
         # resetting search results
         ignore_without_salary = self.search_params.properties['ignore_without_salary']['value']
         min_salary = self.search_params.properties.get('salary', {}).get('value', 0)
@@ -267,13 +279,7 @@ class Application:
             # self.vacancies_by_id[vac.id] = len(self.vacancies) - 1
 
         if len(self.vacancies) and (user_response == '1'):
-            self.menus['main_menu'].add_item('Просмотреть найденные вакансии', 2, self.show_vacancies_list)
-            self.menus['main_menu'].add_item('Показать вакансии детально', 3, self.show_details)
-            self.menus['main_menu'].add_item('Отфильтровать найденные вакансии', 4, self.filter_found_vacancies)
-            self.menus['main_menu'].add_item('Отсортировать найденные вакансии', 5, self.sort_vacancies_list)
-            self.menus['main_menu'].add_item('Удалить вакансии из результатов поиска', 6, self.delete_vacancies)
-            self.menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.save_vacancies_to_file)
-            self.menus['main_menu'].add_item('Топ N вакансий по зарплате', 8, self.show_top)
+            self.extend_main_menu()
 
         self.return_to_main_menu()
 
@@ -439,6 +445,75 @@ class Application:
             else:
                 print('Введите целое число')
 
+    def load_vacancies_from_file(self):
+        filename = input('Введите имя файла (введите пустую строку для отмены): ')
+        if not filename:
+            return
+        filetype_choice = '1'
+
+        if filename.lower().endswith('.txt'):
+            filetype_choice = '1'
+        elif filename.lower().endswith('.csv'):
+            filetype_choice = '2'
+        elif filename.lower().endswith('.json'):
+            filetype_choice = '3'
+
+        par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+        par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
+        data_dir = os.path.join(par_dir, "data")
+        print(f'Файл будет загружен из каталога {data_dir}')
+
+        file_manager = None
+
+        content = ''
+        if filetype_choice == '1':
+            file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
+
+            # for vacancy in self.vacancies:
+            #     content += vacancy.details()
+            #     content += '-' * 100
+            #     content += '\n'
+
+        elif filetype_choice == '2':
+            separator = ';'
+            # if not filename.lower().endswith('.csv'):
+            #     filename += '.csv'
+            #
+            # content = separator.join(Vacancy.headers)+'\n'
+            # for vacancy in self.vacancies:
+            #     content += vacancy.as_csv(separator)
+            #     # content += '-' * 100
+            #     content += '\n'
+
+        elif filetype_choice == '3':
+
+            file_manager = JSONFileManager(storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict)
+            try:
+                new_vacancies = file_manager.load()
+            except FileNotFoundError:
+                print('Указанный файл не найден')
+                return
+            if new_vacancies:
+                if len(self.vacancies):
+                    print('Что сделать с текущим набором вакансий?')
+                    print('1. Оставить, загруженные из файла вакансии добавить к текущим')
+                    print('2. Очистить, загруженные из файла вакансии полностью заменяют текущие.')
+                    user_response = input('Ваш выбор: ')
+
+                    if user_response == '1':
+                        self.vacancies.append(new_vacancies)
+                    else:
+                        self.shrink_main_menu()
+                        self.vacancies = new_vacancies
+                else:
+                    self.vacancies = new_vacancies
+
+        if len(self.vacancies):
+            self.extend_main_menu()
+
+        print('Загрузка завершена.')
+        input('Нажмите Enter')
+
     def init_menus(self) -> None:
         self.menus = {'main_menu': Menu('Добро пожаловать в приложение для поиска вакансий с сайта HeadHunter.ru',
                                         [('Изменить параметры поиска', self.change_search_params),
@@ -447,7 +522,7 @@ class Application:
                                          # ('Отфильтровать найденные вакансии', self.find_vacancies),
                                          # ('Отсортировать найденные вакансии', self.find_vacancies),
                                          # ('Сохранить найденные вакансии в файл', self.find_vacancies),
-                                         ('Загрузить вакансии из файла', self.find_vacancies),
+                                         ('Загрузить вакансии из файла', self.load_vacancies_from_file),
                                          ('Выйти из программы.', Application.terminate),
                                          ]
                                         ),

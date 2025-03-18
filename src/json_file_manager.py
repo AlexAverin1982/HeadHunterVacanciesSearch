@@ -1,9 +1,14 @@
 import os
+from plistlib import loads
+
 import jsonpickle
 
 from src.storage_manager_class import StorageManager
 from typing import Any, Callable
 import json
+
+from src.vacancy_class import Vacancy
+
 """
 Создать класс для сохранения информации о вакансиях в JSON-файл. 
 """
@@ -26,8 +31,8 @@ class JSONFileManager(StorageManager):
         :param append - если True, дозаписывает content в конец существующего файла, если False - перезаписывает
         """
         full_filename = os.path.join(self.working_dir, self.filename)
-        jsonpickle.set_preferred_backend('json')
-        jsonpickle.set_encoder_options('json', ensure_ascii=True)
+        # jsonpickle.set_preferred_backend('json')
+        # jsonpickle.set_encoder_options('json', ensure_ascii=True)
         # json_string = jsonpickle.encode(content, include_properties=True, indent=4)
         # json_string = jsonpickle.encode(content)
 
@@ -49,8 +54,43 @@ class JSONFileManager(StorageManager):
         return os.path.join(self.working_dir, self.filename)
 
 
-    def load(self, conditions: Any | None = None) -> Any:
-        pass
+    def load(self, conditions: Any | None = None) -> list[Vacancy] | None:
+        """
+        загрузка из файла
+        :param conditions - условия для фильтрации данных из файла
+        :param append - если True, дозаписывает content в конец существующего файла, если False - перезаписывает
+        """
+        result = []
+        full_filename = os.path.join(self.working_dir, self.filename)
+        if not os.path.exists(full_filename):
+            raise FileNotFoundError
+        # jsonpickle.set_preferred_backend('json')
+        # jsonpickle.set_encoder_options('json', ensure_ascii=True)
+        # json_string = jsonpickle.encode(content, include_properties=True, indent=4)
+        # json_string = jsonpickle.encode(content)
+
+        # if self.serialization_method:
+        #     json_string = json.dumps(content, default=self.serialization_method, ensure_ascii=False, indent=4)
+        # else:
+        #     json_string = json.dumps(content, ensure_ascii=False, indent=4)
+        # # print(json_string)
+        #
+        # if append:
+        #     write_mode = 'a'
+        # else:
+        #     write_mode = 'w'
+        with open(full_filename, 'r') as f:
+            json_string = json.load(f)
+        content = json.loads(json_string)
+
+        if content and isinstance(content, dict):
+            items = content.get('items')
+            if items and isinstance(items, list):
+                for item in items:
+                    vacancy = Vacancy(item.get('properties'))
+                    result.append(vacancy)
+
+        return result
 
     def delete(self, conditions: Any | None = None) -> Any:
         pass

@@ -4,16 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="area reference">
-      <change afterPath="$PROJECT_DIR$/src/fetcher_class.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/json_file_manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/storage_manager_class.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/text_file_manager_class.py" afterDir="false" />
+    <list default="true" id="0f76b68e-a447-44c8-864a-3dc26c637e21" name="Changes" comment="load vacancies from json">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/poetry.lock" beforeDir="false" afterPath="$PROJECT_DIR$/poetry.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/application_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/application_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_engine_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_engine_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/json_file_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/json_file_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vacancy_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vacancy_class.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -21,44 +15,9 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
-  <component name="Git.Rebase.Settings">
-    <option name="NEW_BASE" value="feature/phase_0" />
-  </component>
   <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="develop" />
-      </map>
-    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-    <option name="RESET_MODE" value="HARD" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;AlexAverin1982&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:AlexAverin1982/HeadHunterVacanciesSearch.git&quot;,
-    &quot;accountId&quot;: &quot;118f3675-e4a4-405f-826a-2e4f64e8e1bb&quot;
-  }
-}</component>
-  <component name="MarkdownSettingsMigration">
-    <option name="stateVersion" value="1" />
-  </component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 4
-}</component>
-  <component name="ProjectId" id="2ta4vnwLhBCcS10lxwATlvAjG6r" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -66,19 +25,12 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.json_file_manager.executor": "Debug",
     "Python.main.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/phase__0",
-    "last_opened_file_path": "D:/python/skypro/HeadHunterVacanciesSearch/src"
+    "git-widget-placeholder": "feature/phase__0"
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\python\skypro\HeadHunterVacanciesSearch\src" />
-    </key>
-  </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager">
     <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
       <option name="ENV_FILES" value="" />
@@ -101,131 +53,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="search_parameters_class" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="HeadHunterVacanciesSearch" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\python\skypro\kurs02\HeadHunterVacanciesSearch\src\search_parameters_class.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.main" />
-        <item itemvalue="Python.search_parameters_class" />
-        <item itemvalue="Python.search_parameters_class" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.search_parameters_class" />
       </list>
     </recent_temporary>
   </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-python-sdk-fc1d50d2d915-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.24978.54" />
-      </set>
-    </attachedChunks>
-  </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="" />
-      <created>1740577085381</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1740577085381</updated>
-    </task>
-    <task id="LOCAL-00001" summary="start working">
-      <created>1741552163519</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1741552163520</updated>
-    </task>
-    <task id="LOCAL-00002" summary="area reference">
-      <option name="closed" value="true" />
-      <created>1741616632545</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1741616632545</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="feature/phase_0" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="start working" />
-    <MESSAGE value="area reference" />
-    <option name="LAST_COMMIT_MESSAGE" value="area reference" />
+    <MESSAGE value="load vacancies from json" />
+    <option name="LAST_COMMIT_MESSAGE" value="load vacancies from json" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hh_dictionaries_class.py</url>
-          <line>24</line>
-          <option name="timeStamp" value="18" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/dictionary_class.py</url>
-          <line>24</line>
-          <option name="timeStamp" value="22" />
+          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
+          <line>31</line>
+          <option name="timeStamp" value="98" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>257</line>
-          <option name="timeStamp" value="92" />
+          <line>93</line>
+          <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
+          <line>10</line>
+          <option name="timeStamp" value="103" />
         </line-breakpoint>
       </breakpoints>
-      <default-breakpoints>
-        <breakpoint type="python-exception">
-          <properties notifyOnTerminate="true" exception="BaseException">
-            <option name="notifyOnTerminate" value="true" />
-          </properties>
-        </breakpoint>
-      </default-breakpoints>
     </breakpoint-manager>
-    <watches-manager>
-      <inline-watch fileUrl="file://$PROJECT_DIR$/src/application_class.py" line="256">
-        <watch expression="vac.salary_specified()" />
-      </inline-watch>
-    </watches-manager>
   </component>
 </project>

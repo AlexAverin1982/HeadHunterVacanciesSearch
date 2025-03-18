@@ -13,130 +13,143 @@ class Vacancy(RecordSet):
         salary = ''
         salary_max = ''
         salary_desc = ''
+        load_from_file_mode = False
 
         salary_data = fields.get('salary', {})
         currency = 'руб.'
         if salary_data:
             if isinstance(salary_data, dict):
-                salary = salary_data.get('from', 0)
-                salary_desc = salary_data.get('gross', True)
-                if salary_desc:
-                    salary_desc = 'до вычета'
-                salary_max = salary_data.get('to', 0)
-                currency = salary_data.get('currency', 'руб.').replace('RUR', 'руб.')
+                if salary_data.get('from'):
+                    salary = salary_data.get('from', 0)
+                    salary_desc = salary_data.get('gross', True)
+                    if salary_desc:
+                        salary_desc = 'до вычета'
+                    salary_max = salary_data.get('to', 0)
+                    currency = salary_data.get('currency', 'руб.').replace('RUR', 'руб.')
+                elif salary_data.get('addendum') and salary_data.get('representation'):
+                    load_from_file_mode = True
             else:
                 print(salary_data)
 
-        if (salary == 0) or (salary is None):
-            salary = ''
-        if (salary_max == 0) or (salary is None):
-            salary_max = ''
-        if (salary_desc is not None) and (str(salary) + str(salary_max)):
-            if isinstance(salary_desc, bool):
-                if salary_desc:
-                    salary_desc = 'до вычета'
+        if load_from_file_mode:
+            self.properties.update(fields)
+        else:
+            if (salary == 0) or (salary is None):
+                salary = ''
+            if (salary_max == 0) or (salary is None):
+                salary_max = ''
+            if (salary_desc is not None) and (str(salary) + str(salary_max)):
+                if isinstance(salary_desc, bool):
+                    if salary_desc:
+                        salary_desc = 'до вычета'
+                    else:
+                        salary_desc = 'на руки'
                 else:
-                    salary_desc = 'на руки'
+                    salary_desc = ''
             else:
                 salary_desc = ''
-        else:
-            salary_desc = ''
 
-        snippet = fields.get('snippet', {})
-        contacts = fields.get('contacts', {})
-        professional_roles = fields.get('professional_roles')
-        if professional_roles:
-            professional_role = professional_roles[0]
-        else:
-            professional_role = {}
-        # print(salary)
-
-        address = fields.get('address', {})
-        if isinstance(address, dict):
-            address = address.get('raw', '')
-        else:
-            address = ''
-
-        work_format = fields.get('work_format')
-        if work_format:
-            if isinstance(work_format, list):
-                formats = [item['name'].replace('\xa0', ' ') for item in work_format]
-                work_format = {'name': ' или '.join(formats)}
+            snippet = fields.get('snippet', {})
+            contacts = fields.get('contacts', {})
+            professional_roles = fields.get('professional_roles')
+            if professional_roles:
+                professional_role = professional_roles[0]
             else:
-                print(work_format)
-        else:
-            work_format = {}
+                professional_role = {}
+            # print(salary)
 
-        published_at = fields.get('published_at', '')
-        if published_at:
-            try:
-                if isinstance(published_at, str):
-                    p = published_at.find('T')
-                    if p > 0:
-                        published_at = {
-                            'value': datetime.strftime(datetime.strptime(published_at[:p], '%Y-%m-%d'), '%d %B %Y')}
+            address = fields.get('address', {})
+            if isinstance(address, dict):
+                address = address.get('raw', '')
+            else:
+                address = ''
+
+            work_format = fields.get('work_format')
+            if work_format:
+                if isinstance(work_format, list):
+                    formats = [item['name'].replace('\xa0', ' ') for item in work_format]
+                    work_format = {'name': ' или '.join(formats)}
+                elif isinstance(work_format, dict):
+                    pass
+                    # if work_format.get('name'):
+                    #     work_format = {'name': work_format['name']}
+                else:
+                    print(work_format)
+            else:
+                work_format = {}
+
+            published_at = fields.get('published_at', '')
+            if published_at:
+                try:
+                    if isinstance(published_at, str):
+                        p = published_at.find('T')
+                        if p > 0:
+                            published_at = {
+                                'value': datetime.strftime(datetime.strptime(published_at[:p], '%Y-%m-%d'), '%d %B %Y')}
+                        else:
+                            print(published_at)
+                    elif isinstance(published_at, dict):
+                        pass
                     else:
                         print(published_at)
-                else:
-                    print(published_at)
-            except ValueError:
+                except ValueError:
+                    published_at = {}
+            else:
                 published_at = {}
-        else:
-            published_at = {}
 
-        self.properties.update({'id': {'value': fields.get('id', ''), 'display_order': 0},
-                                'area': {'id': fields.get('area', {}).get('id', ''),
-                                         'value': fields.get('area', {}).get('name', ''),
-                                         'representation': 'Регион'},
-                                'name': {'value': fields.get('name', ''),
-                                         'representation': 'Вакансия', 'display_order': 2},
-                                'has_test': {'value': fields.get('has_test', False),
-                                             'representation': 'Наличие испытательного срока'},
-                                'url': {'value': fields.get('alternate_url', ''),
-                                        'representation': 'Ссылка', 'display_order': 1},
-                                'address': {'value': address,
-                                            'representation': 'Адрес'},
-                                'salary': {'value': salary,
-                                           'representation': 'Зарплата от',
-                                           'addendum': 'currency',
-                                           'suffix': salary_desc, 'display_order': 3},
-                                'salary_max': {'value': salary_max,
-                                               'representation': 'до',
+            self.properties.update({'id': {'value': fields.get('id', ''), 'display_order': 0},
+                                    'area': {'id': fields.get('area', {}).get('id', ''),
+                                             'value': fields.get('area', {}).get('name', ''),
+                                             'representation': 'Регион'},
+                                    'name': {'value': fields.get('name', ''),
+                                             'representation': 'Вакансия', 'display_order': 2},
+                                    'has_test': {'value': fields.get('has_test', False),
+                                                 'representation': 'Наличие испытательного срока'},
+                                    'url': {'value': fields.get('alternate_url', ''),
+                                            'representation': 'Ссылка', 'display_order': 1},
+                                    'address': {'value': address,
+                                                'representation': 'Адрес'},
+                                    'salary': {'value': salary,
+                                               'representation': 'Зарплата от',
                                                'addendum': 'currency',
-                                               'display_order': 4},
-                                'currency': {'value': currency, 'representation': 'Валюта зарплаты',
-                                             'display_order': 4},
-                                'published_at': {'value': published_at.get('value', ''),
-                                                 'representation': 'Дата публикации'},
-                                'archived': {'value': fields.get('archived', False),
-                                             'representation': 'Находится в архиве'},
-                                'employer': {'id': fields.get('employer', {}).get('id', ''),
-                                             'value': fields.get('employer', {}).get('name', ''),
-                                             'representation': 'Работодатель', 'display_order': 5},
-                                'requirement': {'value': snippet.get('requirement', ''),
-                                                'representation': 'Требования',
-                                                'display_order': 7},
-                                'responsibility': {'value': snippet.get('responsibility', ''),
-                                                   'representation': 'Обязанности',
-                                                   'display_order': 8},
-                                # 'schedule': {'value', fields.get('schedule', {}).get('name', ''),
-                                #              'representation': ''},
-                                'work_format': {'value': work_format.get('name', ''),
-                                                'representation': 'Вид работы'},
-                                # 'working_hours': {'value': fields.get('working_hours', {}).get('name', '')},
-                                # 'working_schedule_by_days': {
-                                #     'value': fields.get('working_schedule_by_days', {}).get('name', '')},
-                                'employment_form': {'value': fields.get('employment_form', {}).get('name', ''),
-                                                    'representation': 'Занятость',
-                                                    'display_order': 9
-                                                    },
-                                'experience': {'value': fields.get('experience', {}).get('name', ''),
-                                               'representation': 'Требуемый опыт',
-                                               'display_order': 6},
-                                'professional_role': {'value': professional_role.get('name', ''),
-                                                      'id': professional_role.get('id', ''),
-                                                      'representation': 'Профессия'}
-                                })
+                                               'suffix': salary_desc, 'display_order': 3},
+                                    'salary_max': {'value': salary_max,
+                                                   'representation': 'до',
+                                                   'addendum': 'currency',
+                                                   'display_order': 4},
+                                    'currency': {'value': currency, 'representation': 'Валюта зарплаты',
+                                                 'display_order': 4},
+                                    'published_at': {'value': published_at.get('value', ''),
+                                                     'representation': 'Дата публикации'},
+                                    'archived': {'value': fields.get('archived', False),
+                                                 'representation': 'Находится в архиве'},
+                                    'employer': {'id': fields.get('employer', {}).get('id', ''),
+                                                 'value': fields.get('employer', {}).get('name', ''),
+                                                 'representation': 'Работодатель', 'display_order': 5},
+                                    'requirement': {'value': snippet.get('requirement', ''),
+                                                    'representation': 'Требования',
+                                                    'display_order': 7},
+                                    'responsibility': {'value': snippet.get('responsibility', ''),
+                                                       'representation': 'Обязанности',
+                                                       'display_order': 8},
+                                    # 'schedule': {'value', fields.get('schedule', {}).get('name', ''),
+                                    #              'representation': ''},
+                                    'work_format': {'value': work_format.get('name', ''),
+                                                    'representation': 'Вид работы'},
+                                    # 'working_hours': {'value': fields.get('working_hours', {}).get('name', '')},
+                                    # 'working_schedule_by_days': {
+                                    #     'value': fields.get('working_schedule_by_days', {}).get('name', '')},
+                                    'employment_form': {'value': fields.get('employment_form', {}).get('name', ''),
+                                                        'representation': 'Занятость',
+                                                        'display_order': 9
+                                                        },
+                                    'experience': {'value': fields.get('experience', {}).get('name', ''),
+                                                   'representation': 'Требуемый опыт',
+                                                   'display_order': 6},
+                                    'professional_role': {'value': professional_role.get('name', ''),
+                                                          'id': professional_role.get('id', ''),
+                                                          'representation': 'Профессия'}
+                                    })
 
         prop_names = self.properties.keys()
         prop_names = sorted(prop_names, key=lambda x: self.properties[x].get('display_order', 999))
