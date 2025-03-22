@@ -53,9 +53,12 @@ class RecordSet:
             ref_name = prop.get('ref_name', property_name)
             if not HhRef.references.get(ref_name):
                 HhRef(ref_name, prop.get('subitems_name', 'items'))
-            if id and HhRef.references[ref_name].item_code_is_valid(new_item_code=id):
-                prop['id'] = id
-                prop['value'] = HhRef.references[ref_name].all_items_dict_by_id[id]['name']
+            if id:
+                if HhRef.references[ref_name].item_code_is_valid(new_item_code=id):
+                    prop['id'] = id
+                    prop['value'] = HhRef.references[ref_name].all_items_dict_by_id[id]['name']
+                else:
+                    raise ValueError
             else:
                 prop['value'] = value
                 if value:

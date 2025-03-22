@@ -66,6 +66,10 @@ class SearchParameters(RecordSet):
         #     result['experience'] = self.experience
         return result
 
+    def __str__(self) -> str:
+        result = 'Параметры поиска:\n' + super().__str__()
+        return result
+
     # def set_property(self, property_name:str, id: str = '', value: str = ''):
     #     if property_name in self.properties.keys():
     #
