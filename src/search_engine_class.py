@@ -30,10 +30,10 @@ class VacanciesSearchEngine:
                 # print(json_data)
                 req.close()
                 result.extend(vac_data.get('items', []))
-                if search_limit:
-                    if len(result) >= search_limit:
-                        result = result[:search_limit + 1]
-                        break
+                # if search_limit:
+                #     if len(result) >= search_limit:
+                #         result = result[:search_limit + 1]
+                #         break
                 page += 1
             else:
                 break

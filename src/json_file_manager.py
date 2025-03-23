@@ -13,6 +13,7 @@ from src.vacancy_class import Vacancy
 Создать класс для сохранения информации о вакансиях в JSON-файл. 
 """
 
+
 class JSONFileManager(StorageManager):
     def __init__(self, storage_name: str, working_dir: str = '', method: Callable | None = None):
         super().__init__(storage_name)
@@ -53,12 +54,10 @@ class JSONFileManager(StorageManager):
         """полный путь к файлу"""
         return os.path.join(self.working_dir, self.filename)
 
-
     def load(self, conditions: Any | None = None) -> list[Vacancy] | None:
         """
         загрузка из файла
         :param conditions - условия для фильтрации данных из файла
-        :param append - если True, дозаписывает content в конец существующего файла, если False - перезаписывает
         """
         result = []
         full_filename = os.path.join(self.working_dir, self.filename)

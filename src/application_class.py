@@ -88,7 +88,6 @@ class Application:
 
         """
 
-
         menu_handlers = {
             'Выйти из программы.': Application.terminate,
             'vacancies_count': self.vacancies_count,
@@ -175,9 +174,9 @@ class Application:
         :param indices_str: строка, содержащая номера нужных вакансий
         """
         if not indices_str:
-            indices = range(len(self.vacancies))    # показываем все
+            indices = range(len(self.vacancies))  # показываем все
         else:
-            indices = get_indices(indices_str, len(self.vacancies))      # выбранные
+            indices = get_indices(indices_str, len(self.vacancies))  # выбранные
 
         details = [self.vacancies[ind].details() for ind in indices]
         self.user_interface.show_current_menu(info_pane=details)
@@ -268,7 +267,6 @@ class Application:
             self.vacancies = []
             self.vacancies_by_id = {}
 
-
         vac_data = self.search_engine.fetch(self.search_params.params(),
                                             self.search_params.properties.get('search_limit', {}).get('value', 0))
         # resetting search results
@@ -276,6 +274,11 @@ class Application:
         min_salary = self.search_params.properties.get('salary', {}).get('value', 0)
         if not min_salary:
             min_salary = 0
+
+        search_limit = self.search_params.properties['search_limit'].get('value')
+        # if search_limit:
+        #     if search_limit < 100:
+        #         self.search_params.properties['per_page']['value'] = search_limit
 
         for item in vac_data:
             vac = Vacancy(item)
@@ -288,27 +291,12 @@ class Application:
                 del vac
             else:
                 self.vacancies.append(vac)
-
-            # self.vacancies_by_id[vac.id] = len(self.vacancies) - 1
+                if search_limit and len(self.vacancies) == search_limit:
+                    break
 
         if len(self.vacancies):
             self.user_interface.extend_main_menu()
             self.user_interface.return_to_main_menu()
-
-    def set_search_limit(self) -> None:
-        valid_input = False
-        search_limit = 0
-        while not valid_input:
-            try:
-                search_limit = int(input('Введите максимальное число искомых вакансий: '))
-                valid_input = True
-            except ValueError:
-                print('Введите целое число')
-        self.search_params.properties['search_limit']['value'] = search_limit
-        # self.search_params.search_limit = search_limit
-        if search_limit < 100:
-            self.search_params.properties['per_page']['value'] = search_limit
-        #     self.search_params.page_items_count = search_limit
 
     def search_area_by_substring(self, substring: str) -> None:
         """
@@ -331,20 +319,17 @@ class Application:
         if not HhRef.references.get('areas'):
             HhRef('areas', 'areas')
         areas = HhRef.references.get('areas').all_items_dict_by_name
-
-        area_names = sorted(areas.keys(), key=lambda x: x)
-        for ind, name in enumerate(area_names):
-            print(f"{ind}. {name} --- {areas[name]['id']}")
-
-        print('Нажмите любую клавишу')
-        getch()
+        areas = [f"{name} --- {areas[name]['id']}" for name in areas.keys()]
+        area_names = sorted(areas, key=lambda x: x)
+        self.user_interface.show_current_menu(info_pane=area_names)
 
     def show_all_regions_sorted_by_code(self) -> None:
         if not HhRef.references.get('area'):
             HhRef('area', 'areas')
-        areas = [area for area in HhRef.references['area']]
-        areas = sorted(areas, key=lambda x: x)
-        print(areas)
+        areas = HhRef.references.get('areas').all_items_dict_by_id
+        areas = [f"{id} --- {areas[id]['name']}" for id in areas.keys()]
+        area_names = sorted(areas, key=lambda x: int(x.split(' ')[0]))
+        self.user_interface.show_current_menu(info_pane=area_names, enumerate_list=False)
 
     def show_regions_structured(self) -> None:
         if not HhRef.references['area']:
@@ -433,53 +418,52 @@ class Application:
 
         self.user_interface.show_message('Загрузка завершена.')
 
-
         # def init_menus(self) -> None:
-    #     self.menus = {'main_menu': Menu('Добро пожаловать в приложение для поиска вакансий с сайта HeadHunter.ru',
-    #                                     [('Изменить параметры поиска', self.change_search_params),
-    #                                      ('Найти вакансии', self.find_vacancies),
-    #                                      # ('Просмотреть найденные вакансии', self.show_vacancies_list),
-    #                                      # ('Отфильтровать найденные вакансии', self.find_vacancies),
-    #                                      # ('Отсортировать найденные вакансии', self.find_vacancies),
-    #                                      # ('Сохранить найденные вакансии в файл', self.find_vacancies),
-    #                                      ('Загрузить вакансии из файла', self.load_vacancies_from_file),
-    #                                      ('Выйти из программы.', Application.terminate),
-    #                                      ]
-    #                                     ),
-    #                   'change_search_params': Menu('Укажите параметры поиска:',
-    #                                                [('Указать регион', self.set_search_area),
-    #                                                 ('Указать минимальную зарплату', self.set_min_salary),
-    #                                                 ('Указать подстроку для поиска', self.set_search_substring),
-    #                                                 # ('Указать максимальную зарплату', Application.terminate),
-    #                                                 ('Указать максимальное число вакансий', self.set_search_limit),
-    #                                                 ('Указать отрасль', Application.terminate),
-    #                                                 ('Указать профессию', Application.terminate),
-    #                                                 ('Уточнить поиск вакансий без зарплаты',
-    #                                                  self.set_igore_without_salary),
-    #                                                 # ('Указать поле для поиска подстроки', Application.terminate),
-    #                                                 ('Установить параметры поика по умолчанию', Application.terminate),
-    #                                                 ('Вернуться в главное меню', self.return_to_main_menu),
-    #                                                 ('Искать вакансии', self.find_vacancies)
-    #                                                 ]
-    #                                                ),
-    #                   'select_area': Menu('Как вы хотите указать регион?',
-    #                                       [('Ввести код региона', self.set_area_code),
-    #                                        ('Подобрать регион по подстроке', self.search_area_by_substring),
-    #                                        ('Показать все регионы, сортировать в алфавитном порядке',
-    #                                         self.show_all_regions_sorted_by_name),
-    #                                        ('Показать все регионы, сортировать по коду',
-    #                                         self.show_all_regions_sorted_by_code),
-    #                                        ('Выводить региоры по иерхии, начиная со стран',
-    #                                         self.show_regions_structured),
-    #                                        ('Вернуться в прежнее меню', self.return_to_previous_menu),
-    #                                        ('Отменить выбор региона', self.change_search_params),
-    #                                        ('Вернуться в главное меню', self.return_to_main_menu),
-    #                                        ('Вернуться в предыдущее меню', self.return_to_previous_menu),
-    #                                        ('Выйти из программы', Application.terminate)
-    #                                        ])
-    #
-    #                   # print('3. Подобрать регион по подстроке\n')
-    #                   }
+        #     self.menus = {'main_menu': Menu('Добро пожаловать в приложение для поиска вакансий с сайта HeadHunter.ru',
+        #                                     [('Изменить параметры поиска', self.change_search_params),
+        #                                      ('Найти вакансии', self.find_vacancies),
+        #                                      # ('Просмотреть найденные вакансии', self.show_vacancies_list),
+        #                                      # ('Отфильтровать найденные вакансии', self.find_vacancies),
+        #                                      # ('Отсортировать найденные вакансии', self.find_vacancies),
+        #                                      # ('Сохранить найденные вакансии в файл', self.find_vacancies),
+        #                                      ('Загрузить вакансии из файла', self.load_vacancies_from_file),
+        #                                      ('Выйти из программы.', Application.terminate),
+        #                                      ]
+        #                                     ),
+        #                   'change_search_params': Menu('Укажите параметры поиска:',
+        #                                                [('Указать регион', self.set_search_area),
+        #                                                 ('Указать минимальную зарплату', self.set_min_salary),
+        #                                                 ('Указать подстроку для поиска', self.set_search_substring),
+        #                                                 # ('Указать максимальную зарплату', Application.terminate),
+        #                                                 ('Указать максимальное число вакансий', self.set_search_limit),
+        #                                                 ('Указать отрасль', Application.terminate),
+        #                                                 ('Указать профессию', Application.terminate),
+        #                                                 ('Уточнить поиск вакансий без зарплаты',
+        #                                                  self.set_igore_without_salary),
+        #                                                 # ('Указать поле для поиска подстроки', Application.terminate),
+        #                                                 ('Установить параметры поика по умолчанию', Application.terminate),
+        #                                                 ('Вернуться в главное меню', self.return_to_main_menu),
+        #                                                 ('Искать вакансии', self.find_vacancies)
+        #                                                 ]
+        #                                                ),
+        #                   'select_area': Menu('Как вы хотите указать регион?',
+        #                                       [('Ввести код региона', self.set_area_code),
+        #                                        ('Подобрать регион по подстроке', self.search_area_by_substring),
+        #                                        ('Показать все регионы, сортировать в алфавитном порядке',
+        #                                         self.show_all_regions_sorted_by_name),
+        #                                        ('Показать все регионы, сортировать по коду',
+        #                                         self.show_all_regions_sorted_by_code),
+        #                                        ('Выводить региоры по иерхии, начиная со стран',
+        #                                         self.show_regions_structured),
+        #                                        ('Вернуться в прежнее меню', self.return_to_previous_menu),
+        #                                        ('Отменить выбор региона', self.change_search_params),
+        #                                        ('Вернуться в главное меню', self.return_to_main_menu),
+        #                                        ('Вернуться в предыдущее меню', self.return_to_previous_menu),
+        #                                        ('Выйти из программы', Application.terminate)
+        #                                        ])
+        #
+        #                   # print('3. Подобрать регион по подстроке\n')
+        #                   }
         """
           self.area: int = 113  # whole Russia
           self.page_items_count: int = 100
@@ -554,11 +538,21 @@ class Application:
                 min_salary = user_response.get('salary')
                 if min_salary:
                     self.search_params.set_property('salary', value=min_salary)
-
+            elif action == 'show all regions sorted by name':
+                self.show_all_regions_sorted_by_name()
+            elif action == 'show all regions sorted by code':
+                self.show_all_regions_sorted_by_code()
+            elif action == 'set vacancies list limit':
+                limit = user_response.get('limit')
+                if limit:
+                    self.search_params.set_property('search_limit', value=limit)
+            elif action == 'delete vacancies':
+                indices_str = user_response.get('indices')
+                indices = sorted(get_indices(indices_str, len(self.vacancies)), reverse=True)
+                for i in indices:
+                    del self.vacancies[i]
 
         self.user_interface.clear_user_response()
-
-
 
     def run(self) -> None:
         self.search_params.set_property(property_name='area', id='113')

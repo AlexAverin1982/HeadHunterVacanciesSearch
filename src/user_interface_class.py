@@ -6,6 +6,8 @@ from typing_extensions import Any, Callable
 
 # from src.display_options_class import DisplayOptions
 from src.menu_class import Menu
+
+
 # from src.search_engine_class import VacanciesSearchEngine
 # from src.search_parameters_class import SearchParameters
 # from src.sort_parameters_class import SortParameter
@@ -102,13 +104,14 @@ class UserInterface:
         main_menu.add_item(caption='Выйти из программы.', pos=99)
         # --------------------------------------------------------------------------------------------------------
         search_params_menu = Menu(name='change_search_params',
-                         caption='Укажите параметры поиска:',
-                         status_bar=self.__menu_handlers.get('vacancies_count'))
+                                  caption='Укажите параметры поиска:',
+                                  status_bar=self.__menu_handlers.get('vacancies_count'))
         self.__menus['change_search_params'] = search_params_menu
         search_params_menu.add_item(caption='Указать регион', pos=0, function=self.__set_area)
         search_params_menu.add_item(caption='Указать минимальную зарплату', pos=1, function=self.__set_min_salary)
         search_params_menu.add_item(caption='Указать подстроку для поиска', pos=2, function=self.__set_search_substring)
-        search_params_menu.add_item(caption='Указать максимальное число вакансий', pos=3, function=self.__set_area)
+        search_params_menu.add_item(caption='Указать максимальное число вакансий', pos=3,
+                                    function=self.__set_vacancies_list_limit)
         search_params_menu.add_item(caption='Указать отрасль', pos=4, function=self.__set_area)
         search_params_menu.add_item(caption='Указать профессию', pos=5, function=self.__set_area)
         search_params_menu.add_item(caption='Уточнить поиск вакансий без зарплаты', pos=6, function=self.__set_area)
@@ -135,9 +138,9 @@ class UserInterface:
         select_area_menu.add_item(caption='Подобрать регион по подстроке', pos=1,
                                   function=self.__search_area_by_substring)
         select_area_menu.add_item(caption='Показать все регионы, сортировать в алфавитном порядке', pos=2,
-                                  function=self.__set_area)
+                                  function=self.__show_all_regions_sorted_by_name)
         select_area_menu.add_item(caption='Показать все регионы, сортировать по коду', pos=3,
-                                  function=self.__set_area)
+                                  function=self.__show_all_regions_sorted_by_code)
         select_area_menu.add_item(caption='Выводить региоры по иерхии, начиная со стран', pos=4,
                                   function=self.__set_area)
         select_area_menu.add_item(caption='Отменить выбор региона', pos=5,
@@ -161,11 +164,21 @@ class UserInterface:
         #                                     self.show_regions_structured),
         #
 
+    def extend_main_menu(self):
+        self.__menus['main_menu'].add_item('Просмотреть найденные вакансии', 2, self.ask_for_brief_vacancies_list)
+        self.__menus['main_menu'].add_item('Показать вакансии детально', 3, self.__ask_vacancies_details)
+        self.__menus['main_menu'].add_item('Отфильтровать найденные вакансии', 4, self.__filter_vacancies)
+        self.__menus['main_menu'].add_item('Отсортировать найденные вакансии', 5)
+        self.__menus['main_menu'].add_item('Удалить вакансии из результатов поиска', 6, self.__delete_vacancies)
+        self.__menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.__save_vacancies_to_file)
+        self.__menus['main_menu'].add_item('Топ N вакансий по зарплате', 8)
+        self.update_menu_handlers()
+
     def show_search_parameters(self, search_params: Any) -> None:
         print('Параметры поиска')
         print(search_params)
 
-    def show_current_menu(self, info_pane: list | str = '') -> None:
+    def show_current_menu(self, info_pane: list | str = '', enumerate_list: bool = True) -> None:
         # Отображаем текущее меню приложения
         print('\n')
         print(self.__current_menu.caption)
@@ -176,7 +189,10 @@ class UserInterface:
                 print('\n')
             elif isinstance(info_pane, list):
                 for ind, item in enumerate(info_pane):
-                    print(f'{ind + 1}. {str(item)}')
+                    if enumerate_list:
+                        print(f'{ind + 1}. {str(item)}')
+                    else:
+                        print(f'{str(item)}')
                 self.show_message()
 
         print(self.__current_menu)
@@ -252,6 +268,18 @@ class UserInterface:
         if search_substring:
             self.__user_response = {'action': 'search area by substring', 'substring': search_substring}
 
+    def __show_all_regions_sorted_by_name(self) -> None:
+        """
+        Запрос у приложения списка всех регионов, отсортированных в алфавитном порядке
+        """
+        self.__user_response = {'action': 'show all regions sorted by name'}
+
+    def __show_all_regions_sorted_by_code(self) -> None:
+        """
+        Запрос у приложения списка всех регионов, отсортированных по коду
+        """
+        self.__user_response = {'action': 'show all regions sorted by code'}
+
     def __set_search_substring(self) -> None:
         """
         Запрос у пользователя подстроки для поиска в тексте вакансии
@@ -269,13 +297,27 @@ class UserInterface:
             #         if not HhRef.references.get('vacancy_search_fields'):
             #             HhRef('vacancy_search_fields', 'items')
 
+    def __set_vacancies_list_limit(self):
+        limit = None
+        while True:
+            try:
+                user_input = input(
+                    'Введите максимальное число вакансий в результатах поиска (пустая строка для отмены):')
+                if user_input:
+                    limit = int(user_input)
+                    break
+                else:
+                    break
+            except ValueError:
+                print('Введите целое число или пустую строку для отмены')
+        if limit:
+            self.__user_response = {'action': 'set vacancies list limit', 'limit': limit}
+
     def __filter_vacancies(self) -> None:
         """
         Командуем отфильтровать найденные вакансии по параметрам поиска
         """
         self.__user_response = {'action': 'filter vacancies'}
-
-
 
     def show_message(self, message: str = '', pause: bool = True) -> None:
         if message:
@@ -287,30 +329,14 @@ class UserInterface:
         print('Что сделать с текущим набором вакансий?')
         print('1. Оставить, загруженные из файла вакансии добавить к текущим')
         print('2. Очистить, загруженные из файла вакансии полностью заменяют текущие.')
-        self.__user_response = {"clear vacancies list": input('Ваш выбор: ')=='2'}
+        self.__user_response = {"clear vacancies list": input('Ваш выбор: ') == '2'}
 
     def ask_vacancies_list_not_empty_when_searching_anew(self):
         print('Очистить текущий список вакансий?')
         print('1. Да, очистить результаты поиска.')
         print('2. Нет, объединить новые результаты поиска с уже существующими.')
-        self.__user_response = {"очистить список вакансий": input('Ваш выбор: ')=='2'}
+        self.__user_response = {"очистить список вакансий": input('Ваш выбор: ') == '2'}
         print('Ищем...')
-
-
-    """
-    self.area: int = 113  # whole Russia
-    self.page_items_count: int = 100
-    self.page: int = 0
-    self.search_field: str = ''
-    self.experience: str = ''
-    self.text: str = ''
-    self.employment: str = ''
-    self.__area_name = ''
-    self.salary: int = 0
-    self.salary_max: int = 0
-    self.search_limit = 0
-    """
-
 
     def respond(self, user_choice: str):
         """
@@ -385,51 +411,38 @@ class UserInterface:
         par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
         data_dir = os.path.join(par_dir, "data")
         print(f'Файл будет сохранен в каталоге {data_dir}')
-        filename = input('Введите имя файла с расширением (введите пустую строку для отмены): ')
-        if not filename:
-            return
-        filetype_choice = None
+        while True:
+            filename = input('Введите имя файла с расширением (введите пустую строку для отмены): ')
+            if not filename:
+                return
+            filetype_choice = None
 
-        if filename.lower().endswith('.txt'):
-            filetype_choice = '1'
-        elif filename.lower().endswith('.csv'):
-            filetype_choice = '2'
-        elif filename.lower().endswith('.json'):
-            filetype_choice = '3'
+            if filename.lower().endswith('.txt'):
+                filetype_choice = '1'
+            elif filename.lower().endswith('.csv'):
+                filetype_choice = '2'
+            elif filename.lower().endswith('.json'):
+                filetype_choice = '3'
 
-        if not filetype_choice:
-            print('Желаемый формат для сохранения файла не определен.')
-            print('Желаемый формат для сохранения файла не определен.')
+            if filetype_choice:
+                break
+            else:
+                print('Желаемый формат для сохранения файла не определен.')
+                print('Укажите имя файла с расширением через точку')
 
-        self.__user_response = {'action': 'load vacancies from file',
+        self.__user_response = {'action': 'save vacancies to file',
                                 'dir': data_dir,
                                 'filename': filename,
-                                'filetype': filetype_choice,
-                                'additional request': "check if vacancies list is not empty"}
+                                'filetype': filetype_choice}
 
-
-    def delete_vacancies(self) -> None:
+    def __delete_vacancies(self) -> None:
         print('Введите номера вакансий, которые вы хотите удалить из списка.')
         print('Номера можно указывать через запятую, или тире для указания диапазона')
         print('Диапазоны также можно указывать через запятую')
         print('Введите пустую строку для отмены удаления')
         indices_str = input('Ваш выбор: ')
-        if not indices_str:
-            return
-
-        indices = sorted(get_indices(indices_str, len(self.vacancies)), reverse=True)
-        for i in indices:
-            del self.vacancies[i]
-
-    def extend_main_menu(self):
-        self.__menus['main_menu'].add_item('Просмотреть найденные вакансии', 2, self.ask_for_brief_vacancies_list)
-        self.__menus['main_menu'].add_item('Показать вакансии детально', 3, self.__ask_vacancies_details)
-        self.__menus['main_menu'].add_item('Отфильтровать найденные вакансии', 4, self.__filter_vacancies)
-        self.__menus['main_menu'].add_item('Отсортировать найденные вакансии', 5)
-        self.__menus['main_menu'].add_item('Удалить вакансии из результатов поиска', 6)
-        self.__menus['main_menu'].add_item('Сохранить найденные вакансии в файл', 7, self.__save_vacancies_to_file)
-        self.__menus['main_menu'].add_item('Топ N вакансий по зарплате', 8)
-        self.update_menu_handlers()
+        if indices_str:
+            self.__user_response = {'action': 'delete vacancies', 'indices': indices_str}
 
 
     def shrink_main_menu(self) -> None:
@@ -443,7 +456,6 @@ class UserInterface:
         self.__menus['main_menu'].delete_item('Топ N вакансий по зарплате')
         self.__menus['main_menu'].delete_item('Удалить вакансии из результатов поиска')
 
-
     def user_response(self):
         return self.__user_response
 
@@ -452,6 +464,7 @@ class UserInterface:
 
     def clear_user_response(self):
         self.__user_response = {}
+
     """
 
 
@@ -888,5 +901,3 @@ class UserInterface:
     #         pass
     
 """
-
-
