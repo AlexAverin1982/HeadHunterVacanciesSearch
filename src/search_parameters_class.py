@@ -1,7 +1,7 @@
 from typing import Any
 from src.hh_reference_class import HeadHunterReference as HhRef
 from src.recordset_class import RecordSet
-
+from copy import deepcopy
 
 class SearchParameters(RecordSet):
     """
@@ -28,22 +28,24 @@ class SearchParameters(RecordSet):
                                 'text': {'id': '',
                                          'value': '',
                                          'representation': 'Искать по подстроке'},
-                                'search_field': {'id': '',
-                                                 'value': '',
-                                                 'representation': 'Искать подстроку в поле'},
+                                'professional_role': {id: '',
+                                                      'value': '',
+                                                      'representation': 'Профессия'},
+                               # 'search_field': {'id': '',
+                               #                   'value': '',
+                               #                   'representation': 'Искать подстроку в поле'},
                                 'search_limit': {'value': 0,
                                                  'representation': 'Количество вакансий',
                                                  'do_not_use_in_search': 'uhuh'},
-                                'ignore_without_salary': {'value': True,
-                                                          'representation': 'Игнорировать вакансии без зарплаты',
-                                                          'do_not_use_in_search': 'uhuh'},
+                                'only_with_salary': {'value': True,
+                                                          'representation': 'Игнорировать вакансии без зарплаты'},
                                 'auto_convert_to_rur': {'value': False,
                                                         'representation':
                                                             'Конвертировать зарплату в рубли автоматически',
                                                         'do_not_use_in_search': 'uhuh'}
                                 })
 
-        del self.properties['salary_max']
+        # del self.properties['salary_max']
 
     def params(self) -> dict:
         result = {}
@@ -66,6 +68,17 @@ class SearchParameters(RecordSet):
         #     result['experience'] = self.experience
         return result
 
+    def fields(self) -> dict:
+        result = deepcopy(self.properties)
+        if result.get('salary'):
+            result['salary'] = {'from': result['salary'].get('value', 0)}
+        if result.get('text'):
+            result['text'] = {'value': result['text'].get('value', 0)}
+        # result = {}
+        # for key in self.properties.keys():
+        #     if key == 'area':
+        #         result[key] = self.properties
+        return result
     def __str__(self) -> str:
         result = 'Параметры поиска:\n' + super().__str__()
         return result

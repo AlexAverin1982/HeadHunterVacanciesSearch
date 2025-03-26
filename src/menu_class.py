@@ -7,12 +7,13 @@ class Menu:
     Класс меню пользовательского интерфейса
     """
 
-    def __init__(self, name: str, caption: str, status_bar: Callable | None = None):
+    def __init__(self, name: str, caption: str, status_bar: Callable | None = None, show_search_params: bool = True):
         self.__name: str = name
         self.caption: str = caption
         # self.__prompt = prompt
         self.__status_bar = status_bar
         self.__items = []
+        self.show_search_params = show_search_params
 
     def __str__(self) -> str:
         # result = 'Выберите дальнейшее действие:\n'

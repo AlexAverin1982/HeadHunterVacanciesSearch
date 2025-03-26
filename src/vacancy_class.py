@@ -1,6 +1,7 @@
 from datetime import datetime as datetime
 from typing_extensions import Self, Any
 from src.recordset_class import RecordSet
+from copy import deepcopy
 
 from json import JSONEncoder
 
@@ -14,8 +15,9 @@ class Vacancy(RecordSet):
         salary_max = ''
         salary_desc = ''
         load_from_file_mode = False
+        self.__fields: dict = deepcopy(fields)
 
-        salary_data = fields.get('salary', {})
+        salary_data = self.__fields.get('salary', {})
         currency = 'руб.'
         if salary_data:
             if isinstance(salary_data, dict):
@@ -32,7 +34,7 @@ class Vacancy(RecordSet):
                 print(salary_data)
 
         if load_from_file_mode:
-            self.properties.update(fields)
+            self.properties.update(self.__fields)
         else:
             if (salary == 0) or (salary is None):
                 salary = ''
@@ -49,22 +51,22 @@ class Vacancy(RecordSet):
             else:
                 salary_desc = ''
 
-            snippet = fields.get('snippet', {})
-            contacts = fields.get('contacts', {})
-            professional_roles = fields.get('professional_roles')
+            snippet = self.__fields.get('snippet', {})
+            contacts = self.__fields.get('contacts', {})
+            professional_roles = self.__fields.get('professional_roles')
             if professional_roles:
                 professional_role = professional_roles[0]
             else:
                 professional_role = {}
             # print(salary)
 
-            address = fields.get('address', {})
+            address = self.__fields.get('address', {})
             if isinstance(address, dict):
                 address = address.get('raw', '')
             else:
                 address = ''
 
-            work_format = fields.get('work_format')
+            work_format = self.__fields.get('work_format')
             if work_format:
                 if isinstance(work_format, list):
                     formats = [item['name'].replace('\xa0', ' ') for item in work_format]
@@ -78,7 +80,7 @@ class Vacancy(RecordSet):
             else:
                 work_format = {}
 
-            published_at = fields.get('published_at', '')
+            published_at = self.__fields.get('published_at', '')
             if published_at:
                 try:
                     if isinstance(published_at, str):
@@ -97,15 +99,15 @@ class Vacancy(RecordSet):
             else:
                 published_at = {}
 
-            self.properties.update({'id': {'value': fields.get('id', ''), 'display_order': 0},
-                                    'area': {'id': fields.get('area', {}).get('id', ''),
-                                             'value': fields.get('area', {}).get('name', ''),
+            self.properties.update({'id': {'value': self.__fields.get('id', ''), 'display_order': 0},
+                                    'area': {'id': self.__fields.get('area', {}).get('id', ''),
+                                             'value': self.__fields.get('area', {}).get('name', ''),
                                              'representation': 'Регион'},
-                                    'name': {'value': fields.get('name', ''),
+                                    'name': {'value': self.__fields.get('name', ''),
                                              'representation': 'Вакансия', 'display_order': 2},
-                                    'has_test': {'value': fields.get('has_test', False),
+                                    'has_test': {'value': self.__fields.get('has_test', False),
                                                  'representation': 'Наличие испытательного срока'},
-                                    'url': {'value': fields.get('alternate_url', ''),
+                                    'url': {'value': self.__fields.get('alternate_url', ''),
                                             'representation': 'Ссылка', 'display_order': 1},
                                     'address': {'value': address,
                                                 'representation': 'Адрес'},
@@ -121,10 +123,10 @@ class Vacancy(RecordSet):
                                                  'display_order': 4},
                                     'published_at': {'value': published_at.get('value', ''),
                                                      'representation': 'Дата публикации'},
-                                    'archived': {'value': fields.get('archived', False),
+                                    'archived': {'value': self.__fields.get('archived', False),
                                                  'representation': 'Находится в архиве'},
-                                    'employer': {'id': fields.get('employer', {}).get('id', ''),
-                                                 'value': fields.get('employer', {}).get('name', ''),
+                                    'employer': {'id': self.__fields.get('employer', {}).get('id', ''),
+                                                 'value': self.__fields.get('employer', {}).get('name', ''),
                                                  'representation': 'Работодатель', 'display_order': 5},
                                     'requirement': {'value': snippet.get('requirement', ''),
                                                     'representation': 'Требования',
@@ -132,18 +134,18 @@ class Vacancy(RecordSet):
                                     'responsibility': {'value': snippet.get('responsibility', ''),
                                                        'representation': 'Обязанности',
                                                        'display_order': 8},
-                                    # 'schedule': {'value', fields.get('schedule', {}).get('name', ''),
+                                    # 'schedule': {'value', self.__fields.get('schedule', {}).get('name', ''),
                                     #              'representation': ''},
                                     'work_format': {'value': work_format.get('name', ''),
                                                     'representation': 'Вид работы'},
-                                    # 'working_hours': {'value': fields.get('working_hours', {}).get('name', '')},
+                                    # 'working_hours': {'value': self.__fields.get('working_hours', {}).get('name', '')},
                                     # 'working_schedule_by_days': {
-                                    #     'value': fields.get('working_schedule_by_days', {}).get('name', '')},
-                                    'employment_form': {'value': fields.get('employment_form', {}).get('name', ''),
+                                    #     'value': self.__fields.get('working_schedule_by_days', {}).get('name', '')},
+                                    'employment_form': {'value': self.__fields.get('employment_form', {}).get('name', ''),
                                                         'representation': 'Занятость',
                                                         'display_order': 9
                                                         },
-                                    'experience': {'value': fields.get('experience', {}).get('name', ''),
+                                    'experience': {'value': self.__fields.get('experience', {}).get('name', ''),
                                                    'representation': 'Требуемый опыт',
                                                    'display_order': 6},
                                     'professional_role': {'value': professional_role.get('name', ''),
@@ -157,24 +159,24 @@ class Vacancy(RecordSet):
             Vacancy.headers = prop_names
 
         self.display_props = ['name', 'salary', 'employer', 'experience', 'url']
-        # if isinstance(fields, dict):
-        # self.id: str = fields.get('id', '')
-        # self.name: str = fields.get('name', '')
-        # self.has_test: bool = fields.get('has_test', False)
-        # self.url = fields.get('alternate_url', '')
+        # if isinstance(self.__fields, dict):
+        # self.id: str = self.__fields.get('id', '')
+        # self.name: str = self.__fields.get('name', '')
+        # self.has_test: bool = self.__fields.get('has_test', False)
+        # self.url = self.__fields.get('alternate_url', '')
 
-        # area = fields.get('area', {})
+        # area = self.__fields.get('area', {})
         # self.area: str = area.get('name', 'не указано')
         """
-        self.salary = fields.get('salary', {})
-        self.publish_date: str = fields.get('published_at')
-        snippet = fields.get('snippet', {})
+        self.salary = self.__fields.get('salary', {})
+        self.publish_date: str = self.__fields.get('published_at')
+        snippet = self.__fields.get('snippet', {})
         self.description = snippet.get('requirement')
         self.duty = snippet.get('responsibility')
-        schedule = fields.get('schedule', {})
+        schedule = self.__fields.get('schedule', {})
         self.job_type = schedule.get('name', {})
-        self.experience = fields.get('experience', {}).get('name', 'не имеет значения').lower()
-        self.employer = fields.get('employer', {}).get('name', 'не указан')
+        self.experience = self.__fields.get('experience', {}).get('name', 'не имеет значения').lower()
+        self.employer = self.__fields.get('employer', {}).get('name', 'не указан')
         """
 
     def __str__(self):
@@ -203,7 +205,10 @@ class Vacancy(RecordSet):
         return result.replace(' ; ', '; ')
 
     def to_dict(self) -> Any:
-        return self.__dict__
+        all_dict = self.__dict__
+        del all_dict['properties']
+        del all_dict['display_props']
+        return all_dict
 
     def salary_specified(self) -> bool:
         # return self.properties.get('salary', {}).get('value', '') != ''
@@ -252,6 +257,13 @@ class Vacancy(RecordSet):
     def __le__(self, other: Self) -> bool:
         return self.__eq__(other) or self.__lt__(other)
 
+    def __int__(self) -> int:
+        result = self.properties.get('salary', {}).get('value', 0)
+        if isinstance(result, int):
+            return result
+        else:
+            return 0
+
     def details(self) -> str:
         result = ''
         prop_names = self.properties.keys()
@@ -266,6 +278,9 @@ class Vacancy(RecordSet):
             else:
                 result += f"{name}: {value}\n"
         return result
+
+    def fields(self) -> dict:
+        return self.__fields
 
     def default(self, o):
         return o.__dict__
