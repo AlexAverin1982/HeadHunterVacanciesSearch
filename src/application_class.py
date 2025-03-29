@@ -7,6 +7,7 @@ from src.text_file_manager_class import TextFileManager
 from src.user_interface_class import UserInterface
 from src.vacancy_class import Vacancy
 
+from copy import deepcopy
 
 class Application:
     """
@@ -19,7 +20,7 @@ class Application:
     @classmethod
     def terminate(cls) -> None:
         """
-        завершение работы приложения
+        Завершение работы приложения
         """
         cls.work_is_over = True
 
@@ -157,7 +158,7 @@ class Application:
             file_manager = JSONFileManager(  # type: ignore[assignment]
                 storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict
             )
-            content = {"items": self.vacancies}  # type: ignore[assignment]
+            content = {"items": deepcopy(self.vacancies)}  # type: ignore[assignment]
 
         if file_manager and content:
             file_manager.save(content=content, append=append)
@@ -340,7 +341,7 @@ class Application:
             file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
 
             try:
-                vacancies_data = file_manager.load(conditions, fails_if_none)
+                vacancies_data = file_manager.load(conditions, fails_if_none, encoding='utf-8')
                 if vacancies_data:
                     vacancies_data = [
                         Vacancy.validate_fields(raw_item) for raw_item in vacancies_data

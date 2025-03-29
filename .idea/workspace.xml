@@ -4,164 +4,142 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0f76b68e-a447-44c8-864a-3dc26c637e21" name="Changes" comment="restruct phase 1">
-      <change afterPath="$PROJECT_DIR$/data/test6.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="db1bb058-353d-4985-a366-b006d11297c4" name="Changes" comment="lazy sunday">
+      <change beforePath="$PROJECT_DIR$/.coverage" beforeDir="false" afterPath="$PROJECT_DIR$/.coverage" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/iv_1.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/ost.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/ost.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/test1.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test2.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test3.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/test3.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test4.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test5.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test6.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/test6.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/test7.txt" beforeDir="false" afterPath="$PROJECT_DIR$/data/test7.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/vacancies.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/application_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/application_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hh_reference_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/hh_reference_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/fetcher_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/fetcher_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/json_file_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/json_file_manager.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/menu_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/menu_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/misc_tools.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/misc_tools.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/recordset_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/recordset_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/search_parameters_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_parameters_class.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/user_interface_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/user_interface_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/search_engine_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/search_engine_class.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/vacancy_class.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/vacancy_class.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/test_storage_manager.py" beforeDir="false" afterPath="$PROJECT_DIR$/tests/test_storage_manager.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;AlexAverin1982&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;git@github.com:AlexAverin1982/HeadHunterVacanciesSearch.git&quot;,
-    &quot;accountId&quot;: &quot;118f3675-e4a4-405f-826a-2e4f64e8e1bb&quot;
-  }
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 8
-}</component>
-  <component name="ProjectId" id="2uWlW32tEXtBwRnqytiPVMcAt2J" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.json_file_manager.executor": "Debug",
-    "Python.main.executor": "Debug",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "feature/phase__0",
-    "last_opened_file_path": "D:/python/skypro/HeadHunterVacanciesSearch/.idea/workspace.xml"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.json_file_manager.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;feature/phase__0&quot;
   }
-}]]></component>
-  <component name="RunManager">
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+}</component>
+  <component name="RunManager" selected="Python tests.Python tests in tests">
+    <configuration name="Python tests for test_application_class.test_check_out_user_response" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
       <module name="HeadHunterVacanciesSearch" />
-      <option name="ENV_FILES" value="" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1 PYDEVD_USE_FRAME_EVAL=NO" />
-      </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_application_class.test_check_out_user_response&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in test_application_class.py" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="HeadHunterVacanciesSearch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests/test_application_class.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Python tests in tests" type="tests" factoryName="Autodetect" temporary="true" nameIsGenerated="true">
+      <module name="HeadHunterVacanciesSearch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for tests.test_application_class" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="HeadHunterVacanciesSearch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="D:\python\skypro\kurs02\HeadHunterVacanciesSearch\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_application_class&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for tests.test_application_class.test_check_out_user_response" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="HeadHunterVacanciesSearch" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="D:\python\skypro\kurs02\HeadHunterVacanciesSearch\.venv\Scripts\python.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/tests" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;tests.test_application_class.test_check_out_user_response&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.main" />
+        <item itemvalue="Python tests.Python tests in tests" />
+        <item itemvalue="Python tests.Python tests in test_application_class.py" />
+        <item itemvalue="Python tests.Python tests for test_application_class.test_check_out_user_response" />
+        <item itemvalue="Python tests.pytest for tests.test_application_class.test_check_out_user_response" />
+        <item itemvalue="Python tests.pytest for tests.test_application_class" />
       </list>
     </recent_temporary>
   </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-python-sdk-fc1d50d2d915-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.24978.54" />
-      </set>
-    </attachedChunks>
-  </component>
-  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
-    <task id="LOCAL-00001" summary="load vacancies from json update">
-      <option name="closed" value="true" />
-      <created>1742307258234</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1742307258234</updated>
-    </task>
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="0f76b68e-a447-44c8-864a-3dc26c637e21" name="Changes" comment="load vacancies from json update" />
-      <created>1742372239251</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1742372239251</updated>
-    </task>
-    <task id="LOCAL-00002" summary="restruct phase 1">
-      <option name="closed" value="true" />
-      <created>1742670122603</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1742670122603</updated>
-    </task>
-    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
-    <option name="RECENT_FILTERS">
-      <map>
-        <entry key="Branch">
-          <value>
-            <list>
-              <RecentGroup>
-                <option name="FILTER_VALUES">
-                  <option value="feature/phase_0" />
-                </option>
-              </RecentGroup>
-            </list>
-          </value>
-        </entry>
-      </map>
-    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="feature/phase_0" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
+            <State />
           </value>
         </entry>
       </map>
@@ -169,29 +147,65 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="load vacancies from json" />
-    <MESSAGE value="load vacancies from json update" />
-    <MESSAGE value="restruct phase 1" />
-    <option name="LAST_COMMIT_MESSAGE" value="restruct phase 1" />
+    <option name="LAST_COMMIT_MESSAGE" value="load vacancies from json" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+        <line-breakpoint suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
-          <line>232</line>
-          <option name="timeStamp" value="183" />
+          <line>10</line>
+          <option name="timeStamp" value="103" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>452</line>
+          <option name="timeStamp" value="117" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>215</line>
+          <option name="timeStamp" value="118" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/vacancy_class.py</url>
+          <line>365</line>
+          <option name="timeStamp" value="119" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>47</line>
+          <option name="timeStamp" value="120" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>55</line>
+          <option name="timeStamp" value="121" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>54</line>
+          <option name="timeStamp" value="122" />
+        </line-breakpoint>
+        <line-breakpoint suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/tests/test_application_class.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="123" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/src/hh_reference_class.py</url>
-          <line>91</line>
-          <option name="timeStamp" value="200" />
+          <url>file://$PROJECT_DIR$/src/application_class.py</url>
+          <line>530</line>
+          <option name="timeStamp" value="128" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="self.user_interface" language="Python" />
-      </configuration>
+      <inline-watch fileUrl="file://$PROJECT_DIR$/src/misc_tools.py" line="104">
+        <watch expression="vac_value" />
+      </inline-watch>
+      <inline-watch fileUrl="file://$PROJECT_DIR$/src/misc_tools.py" line="104">
+        <watch expression="cond_value" />
+      </inline-watch>
     </watches-manager>
   </component>
 </project>

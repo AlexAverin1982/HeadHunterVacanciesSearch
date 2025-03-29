@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Fetcher(ABC):
     """
     Абстрактный класс для работы с API сервиса с вакансиями.
@@ -9,13 +10,13 @@ class Fetcher(ABC):
     def __init__(self):  # type: ignore
         pass
 
-    # @abstractmethod
-    # def __connection_ok(self) -> bool:
-    #     """
-    #     Проверка связи
-    #     :return:  True - связь с сайтом есть
-    #     """
-    #     pass
+    @abstractmethod
+    def __connection_ok(self) -> bool:
+        """
+        Проверка связи
+        :return:  True - связь с сайтом есть
+        """
+        pass
 
     @abstractmethod
     def fetch(self, search_params: dict, search_limit: int = 0) -> None:

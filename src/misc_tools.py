@@ -79,9 +79,30 @@ def vacancy_complies(vac_data: dict, conditions: dict, fail_if_none: bool) -> bo
                             continue
                         result = condition_value["id"] == vacancy_value.get("id", "")
                     elif "from" in condition_value.keys():
-                        result = int(condition_value.get("from", 0)) <= int(
-                            vacancy_value.get("from", 0)
-                        )
+                        cond_value = condition_value.get("from")
+                        if not isinstance(cond_value, int):
+                            if isinstance(cond_value, str) and cond_value.isdigit():
+                                cond_value = int(cond_value)
+                            else:
+                                result = not fail_if_none
+                        if not isinstance(cond_value, int):
+                            if result:
+                                continue
+                            else:
+                                break
+                        vac_value = vacancy_value.get("from")
+                        if not isinstance(vac_value, int):
+                            if isinstance(vac_value, str) and vac_value.isdigit():
+                                vac_value = int(vac_value)
+                            else:
+                                result = not fail_if_none
+                            if not isinstance(vac_value, int):
+                                if result:
+                                    continue
+                                else:
+                                    break
+
+                        result = int(cond_value) <= int(vac_value)
                 else:
                     result = False
             # result = condition_value == vacancy_value

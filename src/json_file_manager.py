@@ -13,7 +13,7 @@ class JSONFileManager(StorageManager):
     Класс для сохранения информации о вакансиях в JSON-файл.
     """
 
-    def __init__(self, storage_name: str, working_dir: str = "", method: Callable | None = None):  # type: ignore
+    def __init__(self, storage_name: str = "", working_dir: str = "", method: Callable | None = None):  # type: ignore
         """
         конструктор
         :param storage_name:    имя файла
@@ -21,7 +21,9 @@ class JSONFileManager(StorageManager):
         :param method:          метод для сохранения данных класса в строку json
         """
         super().__init__(storage_name)
-        self.filename: str = storage_name
+        self.__filename: str = 'new_vacancies.json'
+        if storage_name:
+            self.__filename = storage_name
         self.working_dir: str = working_dir
         self.extension = ".json"
         self.serialization_method: Callable = method        # type: ignore[assignment]
@@ -29,6 +31,14 @@ class JSONFileManager(StorageManager):
 
         if not self.filename.endswith(self.extension):
             self.filename += self.extension
+
+    @property
+    def filename(self):
+        return self. __filename
+
+    @filename.setter
+    def filename(self, new_filename):
+        self.__filename = new_filename
 
     def save(self, content: Any, append: bool) -> None:
         """
@@ -42,6 +52,39 @@ class JSONFileManager(StorageManager):
         # json_string = jsonpickle.encode(content, include_properties=True, indent=4)
         # json_string = jsonpickle.encode(content)
 
+        if append:
+            if os.path.exists(full_filename):
+                old_vacs = self.load()
+                if old_vacs:
+                    old_vacs_ids = {old_vac.properties.get('id', {}).get('value'): ind
+                                    for ind, old_vac in enumerate(old_vacs)}
+
+                    new_vacs = content.get("items")
+                    new_vacs_ids = {new_vac.properties.get('id', {}).get('value'): ind
+                                    for ind, new_vac in enumerate(new_vacs)}
+                    old_ids_set = set(old_vacs_ids.keys())
+                    new_ids_set = set(new_vacs_ids.keys())
+
+                    dups = old_ids_set.intersection(new_ids_set)
+                    if dups:
+                        new_vacs_inds_to_delete = []
+
+                        for new_vac_id, new_ind in new_vacs_ids.items():
+                            old_ind = old_vacs_ids.get(new_vac_id)
+                            if old_ind is not None:
+                                s1 = str(old_vacs[old_ind]).lower()
+                                s2 = str(new_vacs[new_ind]).lower()
+                                if s1 == s2:
+                                    new_vacs_inds_to_delete.append(new_ind)
+
+                        new_vacs_inds_to_delete.sort(reverse=True)
+                        for ind in new_vacs_inds_to_delete:
+                            del new_vacs[ind]
+                        if not len(new_vacs):
+                            return
+                        content = {"items": old_vacs}
+                    old_vacs.extend(new_vacs)
+                    content = {"items": old_vacs}
         if self.serialization_method is not None:
             json_string = json.dumps(
                 content, default=self.serialization_method, ensure_ascii=False, indent=4
@@ -49,14 +92,7 @@ class JSONFileManager(StorageManager):
         else:
             json_string = json.dumps(content, ensure_ascii=False, indent=4)
 
-        if append:
-            write_mode = "a"
-        else:
-            write_mode = "w"
-        # with open(full_filename, write_mode, encoding='') as f:
-        #     json.dump(json_string, f, ensure_ascii=False, indent=4)
-
-        with codecs.open(full_filename, write_mode, "utf-16") as f:  # or utf-8
+        with codecs.open(full_filename, 'w', "utf-8") as f:  # or utf-8
             json.dump(json_string, f, ensure_ascii=False, indent=4)
 
     def full_filename(self) -> str:
@@ -76,7 +112,7 @@ class JSONFileManager(StorageManager):
         full_filename = os.path.join(self.working_dir, self.filename)
         if not os.path.exists(full_filename):
             raise FileNotFoundError
-        with codecs.open(full_filename, "r", encoding="utf-16") as f:
+        with codecs.open(full_filename, "r", encoding="utf-8") as f:
             json_string = json.load(f)
         content = json.loads(json_string)
 
@@ -86,9 +122,13 @@ class JSONFileManager(StorageManager):
                 for item in items:
                     vacancy_data = item.get("_Vacancy__fields")
                     if vacancy_data:
-                        if self.filter_method and self.filter_method(
-                            vacancy_data, conditions, fail_if_none
-                        ):
+                        if conditions:
+                            if self.filter_method and self.filter_method(
+                                vacancy_data, conditions, fail_if_none
+                            ):
+                                vacancy = Vacancy(vacancy_data)
+                                result.append(vacancy)
+                        else:
                             vacancy = Vacancy(vacancy_data)
                             result.append(vacancy)
 

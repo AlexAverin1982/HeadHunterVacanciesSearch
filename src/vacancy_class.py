@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import datetime as datetime
 
-from typing_extensions import Any, Self
+from typing_extensions import Self, Any
 
 from src.recordset_class import RecordSet
 
@@ -85,21 +85,16 @@ class Vacancy(RecordSet):
 
         return result
 
-    def __init__(self, fields: dict):  # type: ignore
+    def __validate_fields(self):
         """
-        Конструктор объкта вакансии
-        :param fields: данные о вакансии с сайта
+        Валидация
+        :return:
         """
-        super().__init__()
-
+        salary_data = self.__fields.get("salary", {})
+        salary_desc = "до вычета"
         salary = ""
         salary_max = ""
-        salary_desc = ""
-        # load_from_file_mode = False
-        self.__fields: dict = deepcopy(fields)
 
-        salary_data = self.__fields.get("salary", {})
-        currency = "руб."
         if salary_data:
             if isinstance(salary_data, dict):
                 if salary_data.get("from"):
@@ -113,29 +108,12 @@ class Vacancy(RecordSet):
                     currency = salary_data.get("currency", "руб.").replace(
                         "RUR", "руб."
                     )
-                # elif salary_data.get('addendum') and salary_data.get('representation'):
-                #     load_from_file_mode = True
-            # else:
-            #     print(salary_data)
+                    if (salary == 0) or (salary is None):
+                        salary = ""
+                    if (salary_max == 0) or (salary is None):
+                        salary_max = ""
 
-        # load_from_file_mode = False
-        # if load_from_file_mode:
-        #     self.properties.update(self.__fields)
-        # else:
-        if (salary == 0) or (salary is None):
-            salary = ""
-        if (salary_max == 0) or (salary is None):
-            salary_max = ""
-            # if (salary_desc is not None) and (str(salary) + str(salary_max)):
-            #     if isinstance(salary_desc, bool):
-            #         if salary_desc:
-            #             salary_desc = 'до вычета'
-            #         else:
-            #             salary_desc = 'на руки'
-            #     else:
-            #         salary_desc = ''
-            # else:
-            #     salary_desc = ''
+        currency = "руб."
 
         snippet = self.__fields.get("snippet", {})
         # contacts = self.__fields.get("contacts", {})
@@ -179,15 +157,7 @@ class Vacancy(RecordSet):
                     }
                 else:
                     published_at = {"value": published_at}
-                    """
-                    # print(published_at)
-                    # elif isinstance(published_at, dict):
-                    # pass
-                    #     else:
-                    #         print(published_at)
-                    # except ValueError:
-                    #     published_at = {}
-                    """
+
         else:
             published_at = {}
 
@@ -283,6 +253,21 @@ class Vacancy(RecordSet):
             }
         )
 
+    def __init__(self, fields: dict):  # type: ignore
+        """
+        Конструктор объкта вакансии
+        :param fields: данные о вакансии с сайта
+        """
+        super().__init__()
+
+        salary = ""
+        salary_max = ""
+        salary_desc = ""
+        # load_from_file_mode = False
+        self.__fields: dict = deepcopy(fields)
+        self.__validate_fields()
+
+
         prop_names = self.properties.keys()
         prop_names = sorted(                # type: ignore[assignment]
             prop_names, key=lambda x: self.properties[x].get("display_order", 999)
@@ -344,6 +329,14 @@ class Vacancy(RecordSet):
         """
         if not isinstance(other, Vacancy):
             return NotImplemented
+        try:
+            self.salary_specified()
+        except ValueError:
+            return False
+        try:
+            other.salary_specified()
+        except ValueError:
+            return False
         self_salary = self.properties.get("salary", {}).get("value", 0)
         if self_salary == "":
             self_salary = 0
@@ -369,6 +362,15 @@ class Vacancy(RecordSet):
         :param other: другая вакансия
         :return: True - у другой вакансии зарплата меньше
         """
+        try:
+            self.salary_specified()
+        except ValueError:
+            return False
+        try:
+            other.salary_specified()
+        except ValueError:
+            return False
+
         self_salary = self.properties.get("salary", {}).get("value", 0)
         if isinstance(other, Vacancy):
             other_salary = other.properties.get("salary", {}).get("value", 0)
@@ -392,6 +394,17 @@ class Vacancy(RecordSet):
         :param other: другая вакансия
         :return: True - у другой вакансии зарплата больше
         """
+        try:
+            self.salary_specified()
+        except ValueError:
+            return False
+
+        if isinstance(other, Vacancy):
+            try:
+                other.salary_specified()
+            except ValueError:
+                return False
+
         self_salary = self.properties.get("salary", {}).get("value", 0)
         if (self_salary == "") or (self_salary == 0):
             return True
@@ -401,7 +414,7 @@ class Vacancy(RecordSet):
             other_salary = other
         else:
             other_salary = -1
-        return bool(self_salary <= other_salary)
+        return (other_salary != '') and (self_salary != '') and bool(self_salary <= other_salary)
 
     def __le__(self, other: Self) -> bool:
         """
