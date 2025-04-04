@@ -255,7 +255,7 @@ def test_show_subareas() -> None:
     if found_areas:
         area_data_str = output[4].split(". ")[1]
         name, code = area_data_str.split(" --- ")
-        correct = HhRef.references["areas"].all_items_dict_by_name[name]["id"] == code
+        correct = HhRef.references["areas"].items_by_name[name]["id"] == code
     assert (not found_areas) or correct
     output = []
     app.show_subareas("32")
@@ -334,7 +334,7 @@ def test_show_regions_structured() -> None:
         passed = True
         for area_name in areas:
             subitems = (
-                HhRef.references["areas"].all_items_dict_by_name[area_name].get("areas")
+                HhRef.references["areas"].items_by_name[area_name].get("areas")
             )
             got_subitems = subitems is not None
             if not got_subitems:
