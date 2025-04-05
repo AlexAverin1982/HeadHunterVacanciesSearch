@@ -41,7 +41,10 @@ class UserInterface:
         Инициализация меню
         """
 
-        def init_main_menu():
+        def init_main_menu() -> None:
+            """
+            Добавление пунктов в главное меню
+            """
             main_menu.add_item(
                 caption="Изменить параметры поиска",
                 pos=0,
@@ -63,7 +66,10 @@ class UserInterface:
 
             main_menu.add_item(caption="Выйти из программы.", pos=99)
 
-        def init_search_params_menu():
+        def init_search_params_menu() -> None:
+            """
+            Добавление пунктов меню в меню параметров поиска
+            """
             search_params_menu.add_item(
                 caption="Указать регион", pos=0, function=self.__set_area
             )
@@ -101,7 +107,10 @@ class UserInterface:
             search_params_menu.add_item(caption="Вернуться в главное меню", pos=98)
             search_params_menu.add_item(caption="Искать вакансии", pos=99)
 
-        def init_select_area_menu():
+        def init_select_area_menu() -> None:
+            """
+            Добавление пунктов меню в меню выбора региона
+            """
             select_area_menu.add_item(
                 caption="Ввести код региона", pos=0, function=self.__type_in_area_id
             )

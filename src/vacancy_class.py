@@ -85,9 +85,9 @@ class Vacancy(RecordSet):
 
         return result
 
-    def __validate_fields(self):
+    def __validate_fields(self) -> None:
         """
-        Валидация
+        Конвертация properties в fields и привидение их к нужной структуре
         :return:
         """
         salary_data = self.__fields.get("salary", {})

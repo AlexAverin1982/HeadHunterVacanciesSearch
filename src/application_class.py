@@ -312,16 +312,19 @@ class Application:
         if not HhRef.references["areas"].item_code_is_valid(parent):
             self.user_interface.show_message(f"Регион с кодом {parent} не найден.")
             return
-        areas = HhRef.references.get("areas").items_by_id[parent].get("areas")  # type: ignore[union-attr]
-        if areas:
-            areas = [
-                f"{area_data['name']} --- {area_id}"
-                for area_id, area_data in areas.items()
-            ]
+        child_area_ids = HhRef.references.get("areas").items_by_id[parent].get("areas")  # type: ignore[union-attr]
+        if child_area_ids:
+            areas = []
+
+            for child_id in child_area_ids:
+                child_area = HhRef.references.get("areas", {}).items_by_id.get(child_id)
+                if child_area:
+                    child_area_name = child_area.get('name')
+                    if child_area_name:
+                        areas.append(f"{child_area_name} --- {child_id}")
             area_names = sorted(areas, key=lambda x: x)
-            self.user_interface.show_current_menu(
-                info_pane=area_names, show_info_pane_once=False, pause=False
-            )
+            self.user_interface.show_current_menu(info_pane=area_names,
+                                                  show_info_pane_once=False, pause=False)
         else:
             self.user_interface.show_message(
                 f"Регион с кодом {parent} не содержит составных частей.", pause=True

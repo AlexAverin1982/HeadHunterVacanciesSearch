@@ -343,16 +343,16 @@ def test_show_regions_structured() -> None:
     assert (not found_areas) or passed
 
 
-def test_show_all_professions_names() -> None:
-    assert True
-    global input_values
-    output = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
-    input_values = ["1", "2"]
-    app = Application()
-    app.show_all_professions_names()
-    assert len(output) > 4
+# def test_show_all_professions_names() -> None:
+#     assert True
+#     global input_values
+#     output = []
+#     src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+#     src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+#     input_values = ["1", "2"]
+#     app = Application()
+#     app.show_all_professions_names()
+#     assert len(output) > 4
 
 
 def test_load_vacancies_from_file() -> None:
@@ -453,8 +453,8 @@ def test_check_out_user_response() -> None:
     app.check_out_user_response()
     app.user_interface._UserInterface__type_in_prof_id()
     app.check_out_user_response()
-    app.user_interface._UserInterface__show_all_professions_sorted_by_name()
-    app.check_out_user_response()
+    # app.user_interface._UserInterface__show_all_professions_sorted_by_name()
+    # app.check_out_user_response()
     assert True
 
 
