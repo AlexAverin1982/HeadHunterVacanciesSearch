@@ -10,6 +10,7 @@ class Vacancy(RecordSet):
     """
     Класс, хранящий информацию о вакансии
     """
+
     # __slots__ = ('__fields', 'properties', 'display_props')  конфликтует с механизмом json-сериализации
     # headers: list[str] = []
 
@@ -260,16 +261,12 @@ class Vacancy(RecordSet):
         """
         super().__init__()
 
-        salary = ""
-        salary_max = ""
-        salary_desc = ""
         # load_from_file_mode = False
         self.__fields: dict = deepcopy(fields)
         self.__validate_fields()
 
-
         prop_names = self.properties.keys()
-        prop_names = sorted(                # type: ignore[assignment]
+        prop_names = sorted(  # type: ignore[assignment]
             prop_names, key=lambda x: self.properties[x].get("display_order", 999)
         )
         # if len(prop_names) > len(Vacancy.headers):
@@ -321,7 +318,7 @@ class Vacancy(RecordSet):
         # return self.properties.get('salary', {}).get('value', '') != ''
         return int(self) != 0
 
-    def __eq__(self, other: Self | int) -> bool:            # type: ignore[override]
+    def __eq__(self, other: Self | int) -> bool:  # type: ignore[override]
         """
         Проверка равенства двух вакансий по зарплате
         :param other: другая вакансия
@@ -348,7 +345,7 @@ class Vacancy(RecordSet):
             other_salary = -1
         return bool(self_salary == other_salary)
 
-    def __ne__(self, other: Self) -> bool:      # type: ignore[override]
+    def __ne__(self, other: Self) -> bool:  # type: ignore[override]
         """
         Проверка неравенства двух вакансий по зарплате
         :param other: другая вакансия
@@ -414,7 +411,11 @@ class Vacancy(RecordSet):
             other_salary = other
         else:
             other_salary = -1
-        return (other_salary != '') and (self_salary != '') and bool(self_salary <= other_salary)
+        return (
+            (other_salary != "")
+            and (self_salary != "")
+            and bool(self_salary <= other_salary)
+        )
 
     def __le__(self, other: Self) -> bool:
         """
@@ -441,7 +442,7 @@ class Vacancy(RecordSet):
         """
         result = ""
         prop_names = self.properties.keys()
-        prop_names = sorted(        # type: ignore[assignment]
+        prop_names = sorted(  # type: ignore[assignment]
             prop_names, key=lambda x: self.properties[x].get("display_order", 999)
         )
         for name in prop_names:
@@ -462,7 +463,7 @@ class Vacancy(RecordSet):
         """
         return self.__fields
 
-    def default(self, o):           # type: ignore
+    def default(self, o):  # type: ignore
         """
         Вспомогательный метод для сериализации
         :param o:

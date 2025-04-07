@@ -13,30 +13,30 @@ def get_indices(indices_str: str, items_count: int = 0) -> list[int]:
     indices = []
     for index in indices_list:
         if index.strip().isdigit():
-            index = int(index.strip()) - 1      # type: ignore[assignment]
+            index = int(index.strip()) - 1  # type: ignore[assignment]
             indices.append(min(index, items_count - 1))
         elif index.find("-") > -1:
             index = index.replace(" ", "")
             p = index.find("-")
             start = index[:p]
             if not start:
-                start = 0       # type: ignore[assignment]
-            elif start.strip().isdigit():       # type: ignore[assignment]
-                start = min(int(start.strip()) - 1, items_count - 1)        # type: ignore[assignment]
+                start = 0  # type: ignore[assignment]
+            elif start.strip().isdigit():  # type: ignore[assignment]
+                start = min(int(start.strip()) - 1, items_count - 1)  # type: ignore[assignment]
             else:
                 continue
             end = index[p + 1:]
             if not end:
                 if items_count > 0:
-                    end = items_count - 1       # type: ignore[assignment]
+                    end = items_count - 1  # type: ignore[assignment]
                 else:
                     continue
             elif end.strip().isdigit():
-                end = min(int(end.strip()) - 1, items_count - 1)        # type: ignore[assignment]
+                end = min(int(end.strip()) - 1, items_count - 1)  # type: ignore[assignment]
             else:
                 continue
-            indices.extend(range(start, end + 1))       # type: ignore[operator]
-    return sorted(list(set(indices)))           # type: ignore[arg-type]
+            indices.extend(range(int(start), int(end + 1)))  # type: ignore[operator]
+    return sorted(list(set(indices)))  # type: ignore[arg-type]
 
 
 def vacancy_complies(vac_data: dict, conditions: dict, fail_if_none: bool) -> bool:

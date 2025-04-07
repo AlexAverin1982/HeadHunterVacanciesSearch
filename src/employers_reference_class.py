@@ -5,39 +5,46 @@ import requests
 
 class EmployersReference:
 
-    def add_employers(self, employers_data: list | dict, allow_without_vacancies: True = False) -> None:
+    def add_employers(
+        self, employers_data: list | dict, allow_without_vacancies: bool = False
+    ) -> None:
         """
         Добавляем одного или нескольких работодателей в справочник
         """
+
         def add_employer(employer_data: dict) -> None:
             """
             Добавляем одного работодателя в справочник
             """
-            id = employer_data.get('id')
+            id = employer_data.get("id")
             if not id:
                 return
             elif self.items_by_id.get(id):
                 return
-            open_vacancies = employer_data.get('open_vacancies', 0)
+            open_vacancies = employer_data.get("open_vacancies", 0)
             if (open_vacancies == 0) and (not allow_without_vacancies):
                 return
-            name = employer_data.get('name')
-            url = employer_data.get('url')
-            alternate_url = employer_data.get('alternate_url')
+            name = employer_data.get("name")
+            url = employer_data.get("url")
+            alternate_url = employer_data.get("alternate_url")
             # open_vacancies = employer_data.get('open_vacancies')
-            area_id = employer_data.get('area', {}).get('id')
+            area_id = employer_data.get("area", {}).get("id")
             if isinstance(open_vacancies, int):
-                self.items_by_name[name] = {'id': id,
-                                            'url': url,
-                                            'alternate_url': alternate_url,
-                                            'open_vacancies': open_vacancies,
-                                            'area_id': area_id}
+                self.items_by_name[name] = {
+                    "id": id,
+                    "url": url,
+                    "alternate_url": alternate_url,
+                    "open_vacancies": open_vacancies,
+                    "area_id": area_id,
+                }
 
-                self.items_by_id[id] = {'name': name,
-                                        'url': url,
-                                        'alternate_url': alternate_url,
-                                        'open_vacancies': open_vacancies,
-                                        'area_id': area_id}
+                self.items_by_id[id] = {
+                    "name": name,
+                    "url": url,
+                    "alternate_url": alternate_url,
+                    "open_vacancies": open_vacancies,
+                    "area_id": area_id,
+                }
 
         if isinstance(employers_data, list):
             for employer_data in employers_data:

@@ -98,7 +98,7 @@ class TextFileManager(StorageManager):
                 vacancies = self.load(fail_if_none)
                 vacancies_to_save = [
                     v
-                    for v in vacancies      # type: ignore[union-attr]
+                    for v in vacancies  # type: ignore[union-attr]
                     if not vacancy_complies(v.fields(), conditions, fail_if_none)  # type: ignore[arg-type, union-attr]
                 ]
                 self.save(content={"items": vacancies_to_save}, append=False)

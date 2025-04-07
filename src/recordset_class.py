@@ -8,7 +8,7 @@ class RecordSet:
     Структурированный набор свойств для работы со справочниками и вакансиями hh
     """
 
-    def __init__(self):  # type: ignore
+    def __init__(self) -> None:  # type: ignore
         self.properties: dict = {
             "area": {
                 "id": "113",
@@ -48,7 +48,9 @@ class RecordSet:
 
         return result
 
-    def set_property(self, property_name: str, id: str = "", value: Any | str = "") -> None:
+    def set_property(
+        self, property_name: str, id: str = "", value: Any | str = ""
+    ) -> None:
         """
         Установка значения свойства по известному имени или идентификатору - сеттер
         :param property_name: имя свойства
@@ -72,6 +74,10 @@ class RecordSet:
                 prop["value"] = value
                 if value:
                     if HhRef.references.get(ref_name):
-                        detected_id = (HhRef.references[ref_name].items_by_name.get(value, {}).get("id"))
+                        detected_id = (
+                            HhRef.references[ref_name]
+                            .items_by_name.get(value, {})
+                            .get("id")
+                        )
                         if detected_id:
                             prop["id"] = detected_id

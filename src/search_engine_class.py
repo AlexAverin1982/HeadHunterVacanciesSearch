@@ -15,11 +15,11 @@ class VacanciesSearchEngine(Fetcher):
         super(Fetcher, self).__init__()
         self._Fetcher__connection_ok()
 
-    def _Fetcher__connection_ok(self):
+    def _Fetcher__connection_ok(self) -> bool:
         """
         тот еще костыль. нафига приватный метод в абстрактном родителе ради таких маневров - я хз
         """
-        pass
+        return True
 
     def __connection_ok(self) -> bool:
         """
@@ -56,7 +56,8 @@ class VacanciesSearchEngine(Fetcher):
         while True:
             # search_params['page'] = page
             params1 = params + f"page={page}"
-            req = requests.get(f"https://api.hh.ru/vacancies?{params1}")
+            url = f"https://api.hh.ru/vacancies?{params1}"
+            req = requests.get(url)
             if req.ok:
                 data_str = req.content.decode()
                 vac_data = json.loads(data_str)

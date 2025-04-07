@@ -6,6 +6,10 @@ from src.user_interface_class import UserInterface
 
 output: list = []
 input_values: list = []
+par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
+data_dir = os.path.join(par_dir, "data")
+settings_dir = os.path.join(par_dir, "settings")
 
 
 def test_init__(class_user_interface_fixture: UserInterface) -> None:
@@ -584,3 +588,199 @@ def test_clear_user_response() -> None:
     ui = UserInterface()
     ui.clear_user_response()
     assert ui.user_response() == {}
+
+
+def test_request_db_connection_settings() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["", "", "hh", "----", "hhuser", "123456", ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'connect to db',
+                                  'host': 'localhost',
+                                  'port': '5432',
+                                  'rootpass': '----',
+                                  'dbname': 'hh',
+                                  'user': 'hhuser',
+                                  'password': '123456'}
+    input_values = ["", "", "hh", "----", "", "123456", ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'connect to db',
+                                  'host': 'localhost',
+                                  'port': '5432',
+                                  'rootpass': '----',
+                                  'dbname': 'hh',
+                                  'user': 'postgres',
+                                  'password': '123456'}
+    input_values = ["", "", "hh", "", "", "", ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {}
+
+
+def test_connect_to_db_server() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["", "", "hh", "hhuser", "123456", ]
+
+    ui = UserInterface()
+    ui._UserInterface__connect_to_db_server()  # type: ignore[attr-defined]
+
+    assert ui.user_response() == {'action': 'connect to db',
+                                  'host': 'localhost',
+                                  'port': '5432',
+                                  'dbname': 'hh',
+                                  'user': 'hhuser',
+                                  'password': '123456'}
+
+
+def test_create_db() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    ui = UserInterface()
+    input_values = ["", "", "hh", "sa_password", "hhuser", "123456", "", "", "hh", "hhuser", "123456", ]
+    ui._UserInterface__create_db()  # type: ignore[attr-defined]
+
+    assert ui.user_response() == {'action': 'create db',
+                                  'dbname': 'hh',
+                                  'host': 'localhost',
+                                  'password': '123456',
+                                  'port': '5432',
+                                  'user': 'hhuser',
+                                  'rootpass': 'sa_password'}
+
+
+def test_get_employers_data() -> None:
+    ui = UserInterface()
+    ui._UserInterface__get_employers_data()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'get employers data'}
+
+
+def test_show_employers_and_vacancies_count() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_employers_and_vacancies_count()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'show employers and vacancies count'}
+
+
+def test_save_vacancies_to_db() -> None:
+    ui = UserInterface()
+    ui._UserInterface__save_vacancies_to_db()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'save vacancies to db'}
+
+
+def test_save_connection_settings_to_file() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_filename.txt"]
+    ui._UserInterface__save_connection_settings_to_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'save connection settings to file',
+                                  'dir': settings_dir,
+                                  'filename': "test_filename.txt"}
+
+    input_values = [""]
+    ui._UserInterface__save_connection_settings_to_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {}
+
+
+def test_connect_to_db_server_from_file() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_filename.txt"]
+    ui._UserInterface__connect_to_db_server_from_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'load connection settings from file',
+                                  'dir': settings_dir,
+                                  'filename': "test_filename.txt"}
+
+    input_values = [""]
+    ui._UserInterface__connect_to_db_server_from_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'load connection settings from file',
+                                  'dir': settings_dir,
+                                  'filename': "hh.json"}
+
+
+def test_show_all_vacancies() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_all_vacancies()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'show all vacancies'}
+
+
+def test_show_average_salary_in_db() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_average_salary_in_db()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'show average salary in db'}
+
+
+def test_show_vacancies_higher_than_avg() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_vacancies_higher_than_avg()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'show vacancies with salary higher than average'}
+
+
+def test_show_vacancies_with_keywords() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["word1", "word2", "word3", "word4", "", ""]
+    ui._UserInterface__show_vacancies_with_keywords()  # type: ignore[attr-defined]
+    assert ui.user_response() == {'action': 'show vacancies with keywords',
+                                  'keywords': 'word1,word2,word3,word4',
+                                  'separator': ','}
+
+
+def test_shrink_db_menu() -> None:
+    ui = UserInterface()
+    ui.extend_db_menu(False)
+    ui.shrink_db_menu()
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == ['1. Создать базу данных',
+                     '2. Подключиться к базе данных',
+                     '3. Загрузить подключение из файла и подключиться',
+                     '4. Вернуться в главное меню',
+                     '',
+                     '']
+
+
+def test_extend_db_menu() -> None:
+    ui = UserInterface()
+    ui.extend_db_menu(False)
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == ['1. Создать базу данных', '2. Подключиться к базе данных',
+                     '3. Показать все вакансии из базы данных', '4. Показать среднюю зарплату по базе данных',
+                     '5. Показать вакансии с зарплатой выше средней', '6. Показать вакансии, содержащие ключевые слова',
+                     '7. Загрузить подключение из файла и подключиться', '8. Вернуться в главное меню',
+                     '9. Загрузить информацию о работодателях', '10. Показать работодателей и количество их вакансий',
+                     '11. Сохранить настройки подключения в файл', '', '']
+    ui.shrink_db_menu()
+    ui.extend_db_menu(True)
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == ['1. Создать базу данных', '2. Подключиться к базе данных',
+                     '3. Показать все вакансии из базы данных', '4. Показать среднюю зарплату по базе данных',
+                     '5. Показать вакансии с зарплатой выше средней', '6. Показать вакансии, содержащие ключевые слова',
+                     '7. Загрузить подключение из файла и подключиться', '8. Вернуться в главное меню',
+                     '9. Загрузить информацию о работодателях', '10. Показать работодателей и количество их вакансий',
+                     '11. Сохранить настройки подключения в файл', '12. Сохранить вакансии в базу данных', '', '']
+
+def test_set_profession(self):
+    ui = UserInterface()
+    ui._UserInterface__set_profession()  # type: ignore[attr-defined]
+    assert True
+
+def test_input_request() -> None:
+    global input_values
+    output: list = []
+    ui = UserInterface()
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
+        s
+    )  # если надо, можем посмотреть, что выводилось в консоль
+
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_input"]
+    result = ui.input_request("input prompt")  # type: ignore[attr-defined]
+    assert result == "test_input"

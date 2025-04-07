@@ -4,24 +4,25 @@ import psycopg2
 from copy import deepcopy
 
 """
-Получить данные о работодателях и их вакансиях с сайта hh.ru. Для этого используйте публичный API hh.ru и библиотеку 
+Получить данные о работодателях и их вакансиях с сайта hh.ru. Для этого используйте публичный API hh.ru и библиотеку
 requests
 .
 Выбрать не менее 10 интересных вам компаний, от которых вы будете получать данные о вакансиях по API.
-Спроектировать таблицы в БД PostgreSQL для хранения полученных данных о работодателях и их вакансиях. Для работы с БД используйте библиотеку 
-psycopg2
+Спроектировать таблицы в БД PostgreSQL для хранения полученных данных о работодателях и их вакансиях.
+Для работы с БД используйте библиотеку psycopg2
 .
 Реализовать код, который заполняет созданные в БД PostgreSQL таблицы данными о работодателях и их вакансиях.
 """
 
 
-def fill_fields_and_values(data: dict, separator: str, ignore_fields: list[str], only_fields: list[str]) -> tuple[
-    str, str]:
+def fill_fields_and_values(
+    data: dict, separator: str, ignore_fields: list[str], only_fields: list[str]
+) -> tuple[str, str]:
     """
-        Вспомогательная функция для подготовки списков имен полей и их значений для запросов
+    Вспомогательная функция для подготовки списков имен полей и их значений для запросов
     """
-    fields = ''
-    values = ''
+    fields = ""
+    values = ""
     for field, value in data.items():
         if field in ignore_fields:
             continue
@@ -29,7 +30,7 @@ def fill_fields_and_values(data: dict, separator: str, ignore_fields: list[str],
             continue
         if value is None:
             continue
-        if (field != '') and not isinstance(value, dict):
+        if (field != "") and not isinstance(value, dict):
             fields += f"{field}{separator}"
             if isinstance(value, str):
                 if value.find("'") > -1:
@@ -46,12 +47,14 @@ class DBManager:
     Класс DBManager будет подключаться к БД PostgreSQL
     """
 
-    def __init__(self):  # type ignore
-        self.__db_name: str = ''
+    def __init__(self) -> None:  # type ignore
+        self.__db_name: str = ""
         self.__connection_settings: dict = {}
         self.__connection = None
-        self.__error_message: str = ''
-        self.pending_data: dict = {}  # данные, которые движок будет дополнительно запрашивать у приложения
+        self.__error_message: str = ""
+        self.pending_data: dict = (
+            {}
+        )  # данные, которые движок будет дополнительно запрашивать у приложения
 
     @property
     def error_message(self) -> str:
@@ -62,7 +65,7 @@ class DBManager:
 
     def connected(self) -> bool:
         """
-            признак активности подключения к базе данных
+        признак активности подключения к базе данных
         """
         return bool(self.__connection)
 
@@ -89,13 +92,15 @@ class DBManager:
             self.__connection.close()
 
         try:
-            self.__connection = psycopg2.connect(dbname=self.__connection_settings.get('dbname'),
-                                                 user=self.__connection_settings.get('user'),
-                                                 password=self.__connection_settings.get('password'),
-                                                 host=self.__connection_settings.get('host'),
-                                                 port=self.__connection_settings.get('port'))
+            self.__connection = psycopg2.connect(
+                dbname=self.__connection_settings.get("dbname"),
+                user=self.__connection_settings.get("user"),
+                password=self.__connection_settings.get("password"),
+                host=self.__connection_settings.get("host"),
+                port=self.__connection_settings.get("port"),
+            )
         except psycopg2.OperationalError:
-            self.__error_message = 'Подключиться к базе данных не удалось'
+            self.__error_message = "Подключиться к базе данных не удалось"
 
         else:
             self.__connection.autocommit = True
@@ -111,7 +116,7 @@ class DBManager:
         """
         :return: Настройки подлкючения к серверу и имя базы данных
         """
-        result = ''
+        result = ""
         if self.__connection:
             result += str(self.__connection.dsn)
         return result
@@ -120,9 +125,9 @@ class DBManager:
         result = False
         if not self.__connection:
             old_settings = copy.deepcopy(self.__connection_settings)
-            self.__connection_settings['dbname'] = 'postgres'
-            self.__connection_settings['user'] = 'postgres'
-            self.__connection_settings['password'] = old_settings.get('rootpass')
+            self.__connection_settings["dbname"] = "postgres"
+            self.__connection_settings["user"] = "postgres"
+            self.__connection_settings["password"] = old_settings.get("rootpass")
             self.connect()
 
             if self.__error_message:
@@ -134,7 +139,7 @@ class DBManager:
                 try:
                     cur.execute(query)
                 except psycopg2.OperationalError:
-                    self.__error_message = 'Запрос о проверке существования базы данных выполнить не удалось'
+                    self.__error_message = "Запрос о проверке существования базы данных выполнить не удалось"
                 else:
                     result = cur.fetchone()
                 self.__connection_settings = old_settings
@@ -146,36 +151,38 @@ class DBManager:
         создание базы данных с пустыми таблицами
         """
         old_settings = copy.deepcopy(self.__connection_settings)
-        new_user = old_settings.get('user')
-        new_base = old_settings.get('dbname')
-        new_user_password = old_settings.get('password')
+        new_user = old_settings.get("user")
+        new_base = old_settings.get("dbname")
+        new_user_password = old_settings.get("password")
 
-        self.__connection_settings['dbname'] = 'postgres'
-        self.__connection_settings['user'] = 'postgres'
-        self.__connection_settings['password'] = old_settings.get('rootpass')
+        self.__connection_settings["dbname"] = "postgres"
+        self.__connection_settings["user"] = "postgres"
+        self.__connection_settings["password"] = old_settings.get("rootpass")
         self.connect()
 
         # dbname = self.__connection_settings.get('dbname')
         # conn = psycopg2.connect("dbname=postgres user=postgres password=89109995794")
         conn = self.__connection
-        conn.set_client_encoding('UTF8')
+        conn.set_client_encoding("UTF8")
         cur = conn.cursor()
         conn.autocommit = True
 
-        if new_user != 'postgres':
+        if new_user != "postgres":
             query = """
 DO
 $$BEGIN
 IF EXISTS (SELECT FROM pg_roles WHERE rolname = '{}') THEN
     EXECUTE 'DROP OWNED BY {}';
 END IF;
-END$$;        
-        """.format(new_user, new_user)
+END$$;
+        """.format(
+                new_user, new_user
+            )
 
             try:
                 cur.execute(query)
             except psycopg2.OperationalError:
-                self.__error_message = 'Не получилось удалить объекты, которыми владеет удаляемый пользователь'
+                self.__error_message = "Не получилось удалить объекты, которыми владеет удаляемый пользователь"
                 return
 
         try:
@@ -189,14 +196,16 @@ END$$;
             self.__error_message = f"Не получилось создать базу данных {new_base}"
             return
 
-        if new_user != 'postgres':
+        if new_user != "postgres":
             try:
                 cur.execute(f"DROP USER IF EXISTS {new_user};")
             except psycopg2.OperationalError:
                 self.__error_message = f"Не получилось удалить пользователя {new_user}"
                 return
             try:
-                query = "CREATE USER {} PASSWORD '{}';".format(new_user, new_user_password)
+                query = "CREATE USER {} PASSWORD '{}';".format(
+                    new_user, new_user_password
+                )
                 cur.execute(query)
             except psycopg2.OperationalError:
                 self.__error_message = f"Не получилось создать пользователя {new_user}"
@@ -204,7 +213,9 @@ END$$;
             try:
                 cur.execute(f"ALTER DATABASE hh OWNER TO {new_user};")
             except psycopg2.OperationalError:
-                self.__error_message = f"Пользователь {new_user} не стал владельцем базы данных {new_base}"
+                self.__error_message = (
+                    f"Пользователь {new_user} не стал владельцем базы данных {new_base}"
+                )
                 return
         cur.close()
         conn.close()
@@ -213,7 +224,7 @@ END$$;
         self.__connection_settings = deepcopy(old_settings)
         self.connect()
         conn = self.__connection
-        conn.set_client_encoding('UTF8')
+        conn.set_client_encoding("UTF8")
         cur = conn.cursor()
         conn.autocommit = True
         # cur.execute("GRANT USAGE ON SCHEMA public TO hhuser;")
@@ -221,16 +232,18 @@ END$$;
         # cur.execute(f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO hhuser;")
         # cur.execute("GRANT ALL PRIVILEGES ON DATABASE hh to hhuser")
         try:
-            cur.execute('DROP TABLE IF EXISTS vacancy;')
+            cur.execute("DROP TABLE IF EXISTS vacancy;")
         except psycopg2.OperationalError:
             self.__error_message = "Не удалось удалить таблицу vacancy"
             return
 
-        query = ("CREATE TABLE public.vacancy ( id char(9) NOT NULL, name varchar(200) NOT NULL, " +
-                 "area_id varchar(10), address varchar(150), employer_id char(8), " +
-                 "salary int DEFAULT 0, currency varchar(4), requirement text, " +
-                 "responsibility text, alternate_url varchar(150)," +
-                 "CONSTRAINT pk_vacancy_id PRIMARY KEY ( id ));")
+        query = (
+            "CREATE TABLE public.vacancy ( id char(9) NOT NULL, name varchar(200) NOT NULL, "
+            + "area_id varchar(10), address varchar(150), employer_id char(8), "
+            + "salary int DEFAULT 0, currency varchar(4), requirement text, "
+            + "responsibility text, alternate_url varchar(150),"
+            + "CONSTRAINT pk_vacancy_id PRIMARY KEY ( id ));"
+        )
 
         try:
             cur.execute(query)
@@ -239,27 +252,31 @@ END$$;
             return
 
         try:
-            cur.execute('DROP TABLE IF EXISTS employer;')
+            cur.execute("DROP TABLE IF EXISTS employer;")
         except psycopg2.OperationalError:
             self.__error_message = "Не удалось удалить таблицу employer"
             return
 
         try:
-            query = ("CREATE TABLE public.employer ( id char(8) NOT NULL, name varchar(150) NOT NULL, " +
-                     "alternate_url varchar(150) NOT NULL, url varchar(150), vacancies_url varchar(150), " +
-                     "vacancies_count int DEFAULT 0, area_id varchar(20)," +
-                     "CONSTRAINT pk_employer_id PRIMARY KEY ( id ));")
+            query = (
+                "CREATE TABLE public.employer ( id char(8) NOT NULL, name varchar(150) NOT NULL, "
+                + "alternate_url varchar(150) NOT NULL, url varchar(150), vacancies_url varchar(150), "
+                + "vacancies_count int DEFAULT 0, area_id varchar(20),"
+                + "CONSTRAINT pk_employer_id PRIMARY KEY ( id ));"
+            )
             cur.execute(query)
         except psycopg2.OperationalError:
             self.__error_message = "Не удалось создать таблицу vacancy"
             return
 
-        query = """ALTER TABLE public.vacancy ADD CONSTRAINT fk_vacancy_employer FOREIGN KEY ( employer_id ) 
+        query = """ALTER TABLE public.vacancy ADD CONSTRAINT fk_vacancy_employer FOREIGN KEY ( employer_id )
         REFERENCES public.employer( id ) ON DELETE CASCADE ON UPDATE CASCADE;"""
         try:
             cur.execute(query)
         except psycopg2.OperationalError:
-            self.__error_message = "Не удалось добавить внешний ключ fk_vacancy_employer"
+            self.__error_message = (
+                "Не удалось добавить внешний ключ fk_vacancy_employer"
+            )
             return
 
         cur.close()
@@ -269,31 +286,34 @@ END$$;
         if self.__connection:
             return str(self.__connection)
         else:
-            return 'Подключение к серверу отсутствует'
+            return "Подключение к серверу отсутствует"
 
-    def get_companies_and_vacancies_count(self) -> list[dict]:
+    def get_companies_and_vacancies_count(self) -> list[str]:
         """
         — получает список всех компаний и количество вакансий у каждой компании.
         """
-        result = []
+        result: list[str] = []
         conn = self.__connection
         if not conn:
             return result
         cur = conn.cursor()
         conn.autocommit = True
-        query = f"SELECT id, name, vacancies_count FROM employer ORDER BY vacancies_count desc, name;"
+        query = "SELECT id, name, vacancies_count FROM employer ORDER BY vacancies_count desc, name;"
         cur.execute(query)
 
         for data_item in cur.fetchall():
-            result.append(f"id: {data_item[0]} -- name: {data_item[1]} --- vacancies: {data_item[2]}")
+            result.append(
+                f"id: {data_item[0]} -- name: {data_item[1]} --- vacancies: {data_item[2]}"
+            )
 
         return result
 
-    def get_all_vacancies(self) -> list:
+    def get_all_vacancies(self) -> list[str]:
         """
-        — получает список всех вакансий с указанием названия компании, названия вакансии и зарплаты и ссылки на вакансию.
+        — получает список всех вакансий с указанием названия компании,
+        названия вакансии и зарплаты и ссылки на вакансию.
         """
-        result = []
+        result: list[str] = []
         self.connect()
         conn = self.__connection
         if not conn:
@@ -301,14 +321,16 @@ END$$;
         cur = conn.cursor()
         conn.autocommit = True
 
-        query = """select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url 
+        query = """select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url
 from vacancy v join employer e
 on v.employer_id = e.id;"""
         cur.execute(query)
 
         for data_item in cur.fetchall():
-            result.append(f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; " +
-                          f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}")
+            result.append(
+                f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; "
+                + f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}"
+            )
 
             # result.append(f"Вакансия: {data_item[0]}; работодатель: {data_item[1]}; зарплата: " +
             #               f"{data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[4]}")
@@ -331,7 +353,7 @@ on v.employer_id = e.id;"""
         """
         — получает список всех вакансий, у которых зарплата выше средней по всем вакансиям.
         """
-        result = ['Список вакансий с зарплатой выше средней:']
+        result = ["Список вакансий с зарплатой выше средней:"]
         avg_salary = self.get_avg_salary()
         self.connect()
         conn = self.__connection
@@ -340,23 +362,25 @@ on v.employer_id = e.id;"""
         cur = conn.cursor()
         conn.autocommit = True
 
-        query = f"""select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url 
+        query = f"""select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url
         from vacancy v join employer e
         on v.employer_id = e.id
         WHERE v.salary > {avg_salary};"""
         cur.execute(query)
 
         for data_item in cur.fetchall():
-            result.append(f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; " +
-                          f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}")
+            result.append(
+                f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; "
+                + f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}"
+            )
 
         return result
 
-    def get_vacancies_with_keyword(self, keywords: str, separator: str = ',') -> list:
+    def get_vacancies_with_keyword(self, keywords: str, separator: str = ",") -> list[str]:
         """
         — получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python.
         """
-        result = []
+        result: list[str] = []
         self.connect()
         conn = self.__connection
         if not conn:
@@ -365,9 +389,9 @@ on v.employer_id = e.id;"""
         conn.autocommit = True
 
         for keyword in keywords.split(separator):
-            result.append('-' * 30 + f" ключевое слово: {keyword} " + '-' * 30)
+            result.append("-" * 30 + f" ключевое слово: {keyword} " + "-" * 30)
 
-            query = f"""select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url 
+            query = f"""select v.id, v.name, v.salary, v.currency, e.name, v.alternate_url
             from vacancy v join employer e
             on v.employer_id = e.id
             WHERE v.name LIKE '%{keyword}%';"""
@@ -375,40 +399,50 @@ on v.employer_id = e.id;"""
 
             for data_item in cur.fetchall():
                 result.append(
-                    f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; " +
-                    f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}")
+                    f"ID вакансии: {data_item[0]}; требуется: {data_item[1]}; работодатель: {data_item[4]}; "
+                    + f"зарплата: {data_item[2]} {data_item[3]}; ссылка на вакансию: {data_item[5]}"
+                )
 
         if len(result):
-            result.insert(0, 'Список вакансий, название которых содержит указанные ключевые слова:')
+            result.insert(
+                0,
+                "Список вакансий, название которых содержит указанные ключевые слова:",
+            )
         return result
 
-    def insert_employer_data(self, employer_data: dict | list, allow_without_vacancies: bool = True) -> None:
+    def insert_employer_data(
+        self, employer_data: dict | list, allow_without_vacancies: bool = True
+    ) -> None:
         """
-        Вставляем данные о работодателе в таблицу
+        Вставляем данные (один словарь или список) о работодателе в таблицу
         """
 
-        def insert_item(employer_data_item) -> None:
-            employer_id = employer_data_item.get('id')
+        def insert_item(employer_data_item: dict) -> None:
+            """
+            Вставляем данные об одном работодателе в таблицу
+            """
+            nonlocal cur
+            employer_id = employer_data_item.get("id")
             if employer_id:
                 # with self.__connection.cursor() as cursor:
                 query = f"SELECT name FROM employer WHERE id='{employer_id}';"
                 cur.execute(query)
 
-                tablename = 'employer'
-                id = employer_data_item.get('id')
-                open_vacancies = employer_data_item.get('open_vacancies')
-                separator = '||'
+                tablename = "employer"
+                id = employer_data_item.get("id")
+                open_vacancies = employer_data_item.get("open_vacancies")
+                separator = "||"
 
                 if not cur.rowcount:
                     if not allow_without_vacancies:
-                        if not ('open_vacancies' in employer_data_item.keys()):
+                        if not ("open_vacancies" in employer_data_item.keys()):
                             return
-                        elif employer_data_item['open_vacancies'] == 0:
+                        elif employer_data_item["open_vacancies"] == 0:
                             return
-                    separator = ','
-                    fields, values = fill_fields_and_values(employer_data_item,
-                                                            separator,
-                                                            ['open_vacancies'], [])
+                    separator = ","
+                    fields, values = fill_fields_and_values(
+                        employer_data_item, separator, ["open_vacancies"], []
+                    )
                     fields = fields[:-1]
                     values = values[:-1]
 
@@ -421,17 +455,20 @@ on v.employer_id = e.id;"""
                                 query = f"UPDATE {tablename} SET vacancies_count={open_vacancies} WHERE id='{id}';"
                                 cur.execute(query)
                 else:
-                    fields, values = fill_fields_and_values(employer_data_item,
-                                                            separator,
-                                                            ['id', 'open_vacancies'], [])
+                    fields, values = fill_fields_and_values(
+                        employer_data_item, separator, ["id", "open_vacancies"], []
+                    )
                     # set_part_list = []
                     fields_list = fields.split(separator)[:-1]
                     values_list = values.split(separator)[:-1]
                     # for field, value in zip(fields, values):
                     #     set_part_list.append(f"{field}={value}")
                     #     set_part_str = ','.join(set_part_list)
-                    set_part_list = [f"{field}={value}" for field, value in zip(fields_list, values_list)]
-                    set_part_str = ','.join(set_part_list)
+                    set_part_list = [
+                        f"{field}={value}"
+                        for field, value in zip(fields_list, values_list)
+                    ]
+                    set_part_str = ",".join(set_part_list)
                     query = f"UPDATE {tablename} SET {set_part_str} WHERE id='{id}';"
                     cur.execute(query)
                     if open_vacancies is not None:
@@ -445,7 +482,7 @@ on v.employer_id = e.id;"""
         if not self.__connection:
             self.connect()
         if not self.__connection:
-            self.__error_message = 'Не удалось подключиться к базе данных'
+            self.__error_message = "Не удалось подключиться к базе данных"
             return
         conn = self.__connection
         try:
@@ -466,10 +503,10 @@ on v.employer_id = e.id;"""
         Вставляем данные о работодателе в таблицу
         """
         conn = psycopg2.connect("dbname=hh user=hhuser password=123456")
-        conn.set_client_encoding('UTF8')
+        conn.set_client_encoding("UTF8")
         cur = conn.cursor()
         conn.autocommit = True
-        query = f"SELECT id, name FROM employer;"
+        query = "SELECT id, name FROM employer;"
         cur.execute(query)
 
         for record in cur.fetchall():
@@ -505,15 +542,17 @@ on v.employer_id = e.id;"""
             if not self.__connection:
                 self.connect()
 
-            id = vacancy_data.get('id')
-            emp_id = vacancy_data.get('employer', {}).get('id')
-            name = vacancy_data.get('name')
+            id = vacancy_data.get("id")
+            emp_id = vacancy_data.get("employer", {}).get("id")
+            name = vacancy_data.get("name")
 
             conn = self.__connection
 
             if not self.__connection:
-                self.__error_message = ("Не удалось подключиться к базе данных " +
-                                        f" {self.__connection_settings.get('dbname')}")
+                self.__error_message = (
+                    "Не удалось подключиться к базе данных "
+                    + f" {self.__connection_settings.get('dbname')}"
+                )
                 return
 
             cur = conn.cursor()
@@ -530,33 +569,33 @@ on v.employer_id = e.id;"""
                 self.__error_message = f"В вакансии {id} не указан работодатель"
                 return
 
-            salary = vacancy_data.get('salary', {}).get('from', 0)
-            alternate_url = vacancy_data.get('alternate_url')
-            area_id = vacancy_data.get('area', {}).get('id')
-            currency = vacancy_data.get('salary', {}).get('currency')
-            address = vacancy_data.get('address')
+            salary = vacancy_data.get("salary", {}).get("from", 0)
+            alternate_url = vacancy_data.get("alternate_url")
+            area_id = vacancy_data.get("area", {}).get("id")
+            currency = vacancy_data.get("salary", {}).get("currency")
+            address = vacancy_data.get("address")
             if address and isinstance(address, dict):
-                address = address.get('raw', '')
+                address = address.get("raw", "")
             if address is None:
-                address = ''
+                address = ""
             if salary is None:
                 salary = 0
 
-            fields = 'id, name, employer_id, salary'
+            fields = "id, name, employer_id, salary"
             values = f"'{id}', '{name}', '{emp_id}', {salary}"
             if area_id:
-                fields += ',area_id'
+                fields += ",area_id"
                 values += f",'{area_id}'"
             if address:
-                fields += ',address'
+                fields += ",address"
                 if address.find("'"):
                     address = address.replace("'", "''")
                 values += f",'{address}'"
             if currency:
-                fields += ',currency'
+                fields += ",currency"
                 values += f",'{currency}'"
             if alternate_url:
-                fields += ',alternate_url'
+                fields += ",alternate_url"
                 values += f",'{alternate_url}'"
 
             cur.execute(f"SELECT name from vacancy WHERE id='{id}'")

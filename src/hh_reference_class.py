@@ -1,7 +1,3 @@
-import json
-
-import requests
-
 from src.areas_reference_class import AreasReference
 from src.employers_reference_class import EmployersReference
 
@@ -14,14 +10,15 @@ class HeadHunterReference:
     references: dict = {}
 
     @classmethod
-    def add_reference(cls, reference_name, **kwargs):
+    def add_reference(cls, reference_name: str, **kwargs) -> None:
 
-        if reference_name == 'areas':
-            cls.references['areas'] = AreasReference()
-        if reference_name == 'employers':
+        if reference_name == "areas":
+            cls.references["areas"] = AreasReference()
+        if reference_name == "employers":
 
-            cls.references['employers'] = EmployersReference(bool(kwargs.get('allow_without_vacancies')))
-
+            cls.references["employers"] = EmployersReference(
+                bool(kwargs.get("allow_without_vacancies"))
+            )
 
     # def __init__(self, reference_name: str, items_key_name: str | list[str]):  # type: ignore
     #     """
@@ -148,4 +145,3 @@ class HeadHunterReference:
     #         HeadHunterReference.references[reference_name] = self
     #         if reference_name in ['areas']:
     #             break
-

@@ -25,7 +25,7 @@ class Menu:
         self.__name: str = name
         self.caption: str = caption
         # self.__prompt = prompt
-        self.__status_bar: Callable = status_bar            # type: ignore[assignment]
+        self.__status_bar: Callable = status_bar  # type: ignore[assignment]
         self.__items: list = []
         self.show_search_params = show_search_params
 

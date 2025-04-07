@@ -21,23 +21,30 @@ class JSONFileManager(StorageManager):
         :param method:          метод для сохранения данных класса в строку json
         """
         super().__init__(storage_name)
-        self.__filename: str = 'new_vacancies.json'
+        self.__filename: str = "new_vacancies.json"
         if storage_name:
             self.__filename = storage_name
         self.working_dir: str = working_dir
         self.extension = ".json"
-        self.serialization_method: Callable = method        # type: ignore[assignment]
+        self.serialization_method: Callable = method  # type: ignore[assignment]
         self.filter_method: Callable | None = None
 
         if not self.filename.endswith(self.extension):
             self.filename += self.extension
 
     @property
-    def filename(self):
-        return self. __filename
+    def filename(self) -> str:
+        """
+        :return: Имя файла с данными
+        """
+        return self.__filename
 
     @filename.setter
-    def filename(self, new_filename):
+    def filename(self, new_filename: str) -> None:
+        """
+        Установка имени файла
+        :param new_filename:имя файла для работы
+        """
         self.__filename = new_filename
 
     def save(self, content: Any, append: bool) -> None:
@@ -56,12 +63,16 @@ class JSONFileManager(StorageManager):
             if os.path.exists(full_filename):
                 old_vacs = self.load()
                 if old_vacs:
-                    old_vacs_ids = {old_vac.properties.get('id', {}).get('value'): ind
-                                    for ind, old_vac in enumerate(old_vacs)}
+                    old_vacs_ids = {
+                        old_vac.properties.get("id", {}).get("value"): ind
+                        for ind, old_vac in enumerate(old_vacs)
+                    }
 
                     new_vacs = content.get("items")
-                    new_vacs_ids = {new_vac.properties.get('id', {}).get('value'): ind
-                                    for ind, new_vac in enumerate(new_vacs)}
+                    new_vacs_ids = {
+                        new_vac.properties.get("id", {}).get("value"): ind
+                        for ind, new_vac in enumerate(new_vacs)
+                    }
                     old_ids_set = set(old_vacs_ids.keys())
                     new_ids_set = set(new_vacs_ids.keys())
 
@@ -92,7 +103,7 @@ class JSONFileManager(StorageManager):
         else:
             json_string = json.dumps(content, ensure_ascii=False, indent=4)
 
-        with codecs.open(full_filename, 'w', "utf-8") as f:  # or utf-8
+        with codecs.open(full_filename, "w", "utf-8") as f:  # or utf-8
             json.dump(json_string, f, ensure_ascii=False, indent=4)
 
     def full_filename(self) -> str:
@@ -151,8 +162,8 @@ class JSONFileManager(StorageManager):
                 vacancies = self.load(fail_if_none)
                 vacancies_to_save = [
                     v
-                    for v in vacancies      # type: ignore[union-attr]
-                    if not vacancy_complies(v.fields(), conditions, fail_if_none)       # type: ignore[arg-type]
+                    for v in vacancies  # type: ignore[union-attr]
+                    if not vacancy_complies(v.fields(), conditions, fail_if_none)  # type: ignore[arg-type]
                 ]
                 self.save(content={"items": vacancies_to_save}, append=False)
             else:

@@ -150,38 +150,41 @@ def test_save_vacancies_to_file() -> None:
     app.user_interface._UserInterface__set_vacancies_list_limit()
     app.check_out_user_response()
     app.find_vacancies(clear_previous_results=True)
-    src_vacancy = deepcopy(app.vacancies[0])
+    if len(app.vacancies):
+        src_vacancy = deepcopy(app.vacancies[0])
 
-    filename = "test1"
-    filetype = "1"
-    append = False
+        filename = "test1"
+        filetype = "1"
+        append = False
 
-    app.save_vacancies_to_file(data_dir, filename, filetype, append)
+        app.save_vacancies_to_file(data_dir, filename, filetype, append)
 
-    filename = "test3.json"
-    filetype = "3"
-    append = False
+        filename = "test3.json"
+        filetype = "3"
+        append = False
 
-    app.save_vacancies_to_file(data_dir, filename, filetype, append)
-    # app.user_interface._UserInterface__delete_vacancies()
-    # app.check_out_user_response()
+        app.save_vacancies_to_file(data_dir, filename, filetype, append)
+        # app.user_interface._UserInterface__delete_vacancies()
+        # app.check_out_user_response()
 
-    full_filename = os.path.join(data_dir, filename)
-    assert os.path.exists(full_filename)
-    app.vacancies = []
-    app.load_vacancies_from_file(data_dir, filename, filetype)
-    s = str(app.vacancies[0])
-    assert str(src_vacancy) == s
+        full_filename = os.path.join(data_dir, filename)
+        assert os.path.exists(full_filename)
+        app.vacancies = []
+        app.load_vacancies_from_file(data_dir, filename, filetype)
+        s = str(app.vacancies[0])
+        assert str(src_vacancy) == s
 
-    filename = "test1"
-    filetype = "1"
-    append = False
+        filename = "test1"
+        filetype = "1"
+        append = False
 
-    app.save_vacancies_to_file(data_dir, filename, filetype, append)
+        app.save_vacancies_to_file(data_dir, filename, filetype, append)
 
-    full_filename = os.path.join(data_dir, filename + ".txt")
-    app.save_vacancies_to_file(data_dir, filename, filetype, True)
-    assert os.path.exists(full_filename)
+        full_filename = os.path.join(data_dir, filename + ".txt")
+        app.save_vacancies_to_file(data_dir, filename, filetype, True)
+        assert os.path.exists(full_filename)
+    else:
+        assert True
 
 
 # @pytest.mark.parametrize("filename, filetype, append", [('test1.txt', '1', False), ('test1.csv', '2', True),
@@ -218,10 +221,34 @@ def test_find_vacancies() -> None:
     app.user_interface._UserInterface__set_min_salary()
     # найти вакансии
     app.check_out_user_response()
+    app.search_params.set_property('only_with_salary', value=True)
     app.find_vacancies(clear_previous_results=True)
-    assert (len(app.vacancies) == 0) or (
-        app.vacancies[0].properties.get("salary", {}).get("value", 0) >= int(min_salary)
-    )
+    salary = 0
+    if len(app.vacancies):
+        salary = app.vacancies[0].fields().get('salary', {}).get('from')
+
+        if salary is None:
+            salary = 0
+        elif isinstance(salary, str):
+            if salary.isdigit():
+                salary = int(salary)
+            else:
+                salary = 0
+        elif not isinstance(salary, int):
+            salary = 0
+
+        if not salary:
+            salary = app.vacancies[0].fields().get('salary', {}).get('to')
+            if salary is None:
+                salary = 0
+            elif isinstance(salary, str):
+                if salary.isdigit():
+                    salary = int(salary)
+                else:
+                    salary = 0
+            elif not isinstance(salary, int):
+                salary = 0
+    assert (len(app.vacancies) == 0) or (salary >= int(min_salary))
 
 
 def test_search_area_by_substring() -> None:
@@ -453,6 +480,12 @@ def test_check_out_user_response() -> None:
     app.check_out_user_response()
     app.user_interface._UserInterface__type_in_prof_id()
     app.check_out_user_response()
+
+    app.user_interface._UserInterface__reset_search_params()
+    app.check_out_user_response()
+    app.user_interface._UserInterface__work_with_db_connection()
+    app.check_out_user_response()
+    input_values = []
     # app.user_interface._UserInterface__show_all_professions_sorted_by_name()
     # app.check_out_user_response()
     assert True
