@@ -111,7 +111,7 @@ class JSONFileManager(StorageManager):
         return os.path.join(self.working_dir, self.filename)
 
     def load(
-        self, conditions: Any | None = None, fail_if_none: bool = True
+            self, conditions: Any | None = None, fail_if_none: bool = True
     ) -> list[Vacancy] | None:
         """
         загрузка из файла
@@ -135,7 +135,7 @@ class JSONFileManager(StorageManager):
                     if vacancy_data:
                         if conditions:
                             if self.filter_method and self.filter_method(
-                                vacancy_data, conditions, fail_if_none
+                                    vacancy_data, conditions, fail_if_none
                             ):
                                 vacancy = Vacancy(vacancy_data)
                                 result.append(vacancy)
@@ -146,28 +146,36 @@ class JSONFileManager(StorageManager):
         return result
 
     def delete(
-        self,
-        conditions: Any | None = None,
-        fail_if_none: bool = True,
-        delete_if_match: bool = False,
-    ) -> None:
+            self,
+            conditions: Any | None = None,
+            delete_if_none: bool = True,
+            delete_if_match: bool = False,
+    ) -> int:
         """
         Удаление вакансий из файла по указанным параметрам
         :param conditions: параметры для указания вакансий, которые нужно удалить или оставить
-        :param fail_if_none: True: если свойство условия в вакансии не указано, вакансия считается неподходящей
-        :param delete_if_match - Если False, вакансии, подходящие по условиям остаются в файле
+        :param delete_if_none:  Если True, удалять запись в файле, если нет поля, указанного в условии
+        :param delete_if_match: Если True, удалять запись в файле, если условия удовлетворены
         """
         if os.path.exists(self.full_filename()):
-            if delete_if_match:
-                vacancies = self.load(fail_if_none)
-                vacancies_to_save = [
-                    v
-                    for v in vacancies  # type: ignore[union-attr]
-                    if not vacancy_complies(v.fields(), conditions, fail_if_none)  # type: ignore[arg-type]
-                ]
-                self.save(content={"items": vacancies_to_save}, append=False)
-            else:
-                vacancies = self.load(conditions, fail_if_none)
+            # загружаем все вакансии из файла
+            vacancies = self.load()
+            ids_to_delete = []
+            old_count = len(vacancies)
+            for ind, v in enumerate(vacancies):  # type: ignore[union-attr]
+                if delete_if_match == vacancy_complies(v.fields(), conditions,
+                                                       delete_if_none):  # type: ignore[arg-type]
+                    # print(str(v))
+                    # del v
+                    ids_to_delete.append(ind)
+            ids_to_delete.sort(reverse=True)
+            for i in ids_to_delete:
+                del vacancies[i]
+            if vacancies:
+                new_count = len(vacancies)
                 self.save(content={"items": vacancies}, append=False)
+                return old_count - new_count
+            else:
+                return 0
         else:
             raise FileNotFoundError

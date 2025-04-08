@@ -42,7 +42,9 @@ def test_get_indices(indices_str: str, items_count: int, expected_list: list) ->
         ("test6.json", {"salary": {"from": 100000}}, [True, True]),
     ],
 )
-def test_vacancy_complies(filename: str, conditions: dict, expected_result: list[bool]) -> None:
+def test_vacancy_complies(
+    filename: str, conditions: dict, expected_result: list[bool]
+) -> None:
     """
     Соответствие вакансии условиям
     param vac_data: свойства вакансии
@@ -62,23 +64,23 @@ def test_vacancy_complies(filename: str, conditions: dict, expected_result: list
         file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
 
         # conditions = {"page": 10, "per_page": 10, "text":{"value": "^1"}}
-        vacancies_data = file_manager.load(conditions, fails_if_none)       # type: ignore[assignment]
+        vacancies_data = file_manager.load(conditions, fails_if_none)  # type: ignore[assignment]
         if vacancies_data:
             vacancies_data = [
                 Vacancy.validate_fields(raw_item) for raw_item in vacancies_data
             ][: len(expected_result)]
     elif filename.endswith(".json"):
-        file_manager = JSONFileManager(             # type: ignore[assignment]
+        file_manager = JSONFileManager(  # type: ignore[assignment]
             storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict
         )
-        file_manager.filter_method = vacancy_complies   # type: ignore[attr-defined]
+        file_manager.filter_method = vacancy_complies  # type: ignore[attr-defined]
         vacancies = file_manager.load(conditions, fails_if_none)
 
         # vacancies_data = []
         # for vac in vacancies:
         #     vacancies_data.append(vac.fields())
 
-        vacancies_data = [vac.fields() for vac in vacancies][: len(expected_result)]        # type: ignore[union-attr]
+        vacancies_data = [vac.fields() for vac in vacancies][: len(expected_result)]  # type: ignore[union-attr]
     #
     #
     if vacancies_data:

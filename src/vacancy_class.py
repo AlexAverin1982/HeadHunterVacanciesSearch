@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import datetime as datetime
 
-from typing_extensions import Self, Any
+from typing_extensions import Any, Self
 
 from src.recordset_class import RecordSet
 

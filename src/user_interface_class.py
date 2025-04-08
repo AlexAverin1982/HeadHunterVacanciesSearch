@@ -63,6 +63,11 @@ class UserInterface:
                 pos=98,
                 function=self.__load_vacancies_from_file,
             )
+            main_menu.add_item(
+                caption="Удалить вакансии из файла",
+                pos=97,
+                function=self.__delete_vacancies_from_file,
+            )
 
             main_menu.add_item(caption="Выйти из программы.", pos=99)
 
@@ -434,6 +439,44 @@ class UserInterface:
                     print("Введите целое число 1-8")
             else:
                 break
+
+    def __delete_vacancies_from_file(self) -> None:
+        """
+        Удаляем вакансии из файла, используя поисковые параметры
+        """
+        print(f"Файл будет искаться в каталоге {data_dir}")
+        filename = input("Введите имя файла (введите пустую строку для отмены): ")
+        if not filename:
+            return
+        filetype_choice = "1"
+
+        delete_if_none = False
+        print("Удалять вакансии из файла, если:")
+        print("1. вакансия подходит под условия поиска")
+        print("2. вакансия НЕ ПОДХОДИТ под условия поиска")
+        user_response = input("Ваш выбор: ")
+        delete_if_match = user_response == "1"
+
+        print("Если свойство, указанное в условиях, отсутствует в описании вакансии:")
+        print("1. Удалить вакансию")
+        print("2. Оставить вакансию")
+        user_response = input("Ваш выбор: ")
+        delete_if_none = user_response == "1"
+        if filename.lower().endswith(".txt"):
+            filetype_choice = "1"
+        elif filename.lower().endswith(".csv"):
+            filetype_choice = "2"
+        elif filename.lower().endswith(".json"):
+            filetype_choice = "3"
+
+        self.__user_response = {
+            "action": "delete vacancies from file",
+            "dir": data_dir,
+            "filename": filename,
+            "filetype": filetype_choice,
+            "delete_if_none": delete_if_none,
+            "delete_if_match": delete_if_match,
+        }
 
     def __load_vacancies_from_file(self) -> None:
         """

@@ -1,5 +1,6 @@
 import json
 import os.path
+from copy import deepcopy
 
 from src.db_manager_class import DBManager
 from src.hh_reference_class import HeadHunterReference as HhRef
@@ -10,8 +11,6 @@ from src.search_parameters_class import SearchParameters
 from src.text_file_manager_class import TextFileManager
 from src.user_interface_class import UserInterface
 from src.vacancy_class import Vacancy
-
-from copy import deepcopy
 
 
 class Application:
@@ -121,7 +120,9 @@ class Application:
         if not indices_str:
             indices = range(len(self.vacancies))  # показываем все
         else:
-            indices = get_indices(indices_str, len(self.vacancies))  # выбранные        # type: ignore[assignment]
+            indices = get_indices(
+                indices_str, len(self.vacancies)
+            )  # выбранные        # type: ignore[assignment]
 
         details = [self.vacancies[ind].details() for ind in indices]
         self.user_interface.show_current_menu(
@@ -163,14 +164,15 @@ class Application:
                 "Данные о работодателях не удалось загрузить с сайта"
             )
         else:
-            employers_data = HhRef.references.get("employers").items_by_id.items()      # type: ignore[union-attr]
+            employers_data = HhRef.references.get("employers").items_by_id.items()  # type: ignore[union-attr]
             data = []
             for employer_id, employer_data in employers_data:
                 employer_data.update({"id": employer_id})
                 data.append(employer_data)
 
             if self.db_manager.connected():
-                self.db_manager.insert_employer_data(data)
+                failed_employers: list[str] = []
+                self.db_manager.insert_employer_data(data, failed_employers)
                 self.db_manager.show_employers()
 
         #         if not self.db_manager.connection_settings:
@@ -474,6 +476,67 @@ class Application:
 
         self.user_interface.show_message("Загрузка завершена.")
 
+    def delete_vacancies_from_file(
+            self,
+            data_dir: str,
+            filename: str,
+            filetype: str,
+            conditions: dict,
+            delete_if_none: bool = False,
+            delete_if_match: bool = True,
+    ) -> None:
+        """
+        Загрузить вакансии из файла
+        :param data_dir:    каталог загрузки
+        :param filename:    имя файла
+        :param filetype:    тип файла
+        :param conditions:  условия для фильтрации данных вакансий в файле
+        :param delete_if_none:  Если True, удалять запись в файле, если нет поля, указанного в условии
+        :param delete_if_match: Если True, удалять запись в файле, если условия удовлетворены
+        """
+        file_manager = None
+        # content = ""
+        if filetype == "1":
+            file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
+
+            try:
+                file_manager.delete(
+                    conditions, delete_if_none, delete_if_match, encoding="utf-8"
+                )
+            except FileNotFoundError:
+                self.user_interface.show_message("Указанный файл не найден")
+                return
+        elif filetype == "2":
+            pass
+            # separator = ";"
+            # if not filename.lower().endswith('.csv'):
+            #     filename += '.csv'
+            #
+            # content = separator.join(Vacancy.headers)+'\n'
+            # for vacancy in self.vacancies:
+            #     content += vacancy.as_csv(separator)
+            #     # content += '-' * 100
+            #     content += '\n'
+
+        elif filetype == "3":
+            file_manager = JSONFileManager(  # type: ignore[assignment]
+                storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict
+            )
+            file_manager.filter_method = vacancy_complies  # type: ignore[union-attr]
+            try:
+                del_count = file_manager.delete(conditions, delete_if_none,
+                                                delete_if_match)  # type: ignore[assignment, union-attr]
+            except FileNotFoundError:
+                self.user_interface.show_message("Указанный файл не найден")
+                return
+            if del_count:
+                self.user_interface.show_message(f"Удалено {del_count} записей")
+            else:
+                self.user_interface.show_message(
+                    "Подходящие под условия записи в файле отсутствуют"
+                )
+        self.user_interface.show_message("Файл очищен.")
+
     def save_vacancies_to_db(self) -> None:
         """
         Сохраняем вакансии и, если нужно, работодателей в базу данных
@@ -499,10 +562,11 @@ class Application:
                 employer_data["id"] = emp_id
                 employers_data.append(employer_data)
                 vac_data_list.append(vacancy_fields)
+        failed_employers: list[str] = []
         self.db_manager.insert_employer_data(
-            employers_data, allow_without_vacancies=True
+            employers_data, failed_employers, allow_without_vacancies=True
         )
-        self.db_manager.insert_vacancies_data(vac_data_list)
+        self.db_manager.insert_vacancies_data(vac_data_list, failed_employers)
 
     def check_out_user_response(self) -> None:
         """
@@ -511,7 +575,6 @@ class Application:
         user_response = self.user_interface.user_response()
         if user_response:
             action = user_response.get("action")
-            # additional_request = user_response.get('additional request')
             # -----------------------------------------------------------------------------------------------------
             if action == "load vacancies from file":
                 data_dir = user_response.get("dir")
@@ -524,13 +587,31 @@ class Application:
                 fails_if_none = user_response.get("fails if none", False)
                 all_data_set = data_dir and filename and filetype
                 if all_data_set:
+                    if len(self.vacancies):
+                        self.user_interface.ask_vacancies_list_not_empty_when_searching_anew()
+                        if user_response.get("clear vacancies list", True):
+                            self.vacancies = []
                     self.load_vacancies_from_file(
                         data_dir, filename, filetype, conditions, fails_if_none
                     )
-                # else:
-                #     self.user_interface.show_message('Введенных данных не достаточно для продолжения этой операции')
-                #     self.user_interface.return_to_main_menu()
-
+            # -----------------------------------------------------------------------------------------------------
+            if action == "delete vacancies from file":
+                data_dir = user_response.get("dir")
+                filename = user_response.get("filename")
+                filetype = user_response.get("filetype")
+                conditions = self.search_params.fields()
+                delete_if_none = user_response.get("delete_if_none", False)
+                delete_if_match = user_response.get("delete_if_match", False)
+                all_data_set = data_dir and filename and filetype
+                if all_data_set:
+                    self.delete_vacancies_from_file(
+                        data_dir,
+                        filename,
+                        filetype,
+                        conditions,
+                        delete_if_none,
+                        delete_if_match,
+                    )
             # -----------------------------------------------------------------------------------------------------
             elif action == "show vacancies list":
                 self.user_interface.show_current_menu(
@@ -747,24 +828,24 @@ class Application:
                 average_salary = self.db_manager.get_avg_salary()
                 self.user_interface.show_message(f"Средняя зарплата: {average_salary}")
             # -----------------------------------------------------------------------------------------------------
-            elif action == "show vacancies with salary higher than average":
-                vacancies_from_db = self.db_manager.get_vacancies_with_higher_salary()
-                if len(vacancies_from_db):
-                    self.user_interface.show_current_menu(
-                        info_pane=vacancies_from_db, show_info_pane_once=True
-                    )
+            # elif action == "show vacancies with salary higher than average":
+            #     vacancies_from_db = self.db_manager.get_vacancies_with_higher_salary()
+            #     if len(vacancies_from_db):
+            #         self.user_interface.show_current_menu(
+            #             info_pane=vacancies_from_db, show_info_pane_once=True
+            #         )
             # -----------------------------------------------------------------------------------------------------
-            elif action == "show vacancies with keywords":
-                keywords_str = user_response.get("keywords")
-                separator = user_response.get("separator")
-                if keywords_str:
-                    vacancies_from_db = self.db_manager.get_vacancies_with_keyword(
-                        keywords_str, separator
-                    )
-                    if len(vacancies_from_db):
-                        self.user_interface.show_current_menu(
-                            info_pane=vacancies_from_db, show_info_pane_once=True
-                        )
+            # elif action == "show vacancies with keywords":
+            # keywords_str = user_response.get("keywords")
+            # separator = user_response.get("separator")
+            # if keywords_str:
+            #     vacancies_from_db = self.db_manager.get_vacancies_with_keyword(
+            #         keywords_str, separator
+            #     )
+            #     if len(vacancies_from_db):
+            #         self.user_interface.show_current_menu(
+            #             info_pane=vacancies_from_db, show_info_pane_once=True
+            #         )
             # -----------------------------------------------------------------------------------------------------
 
         self.user_interface.clear_user_response()

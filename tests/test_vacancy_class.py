@@ -46,22 +46,22 @@ def test___ne__(class_vacancy_fixture: Vacancy) -> None:
 
 def test___gt__(class_vacancy_fixture: Vacancy) -> None:
     vacancy = class_vacancy_fixture
-    assert int(vacancy) > 0      # type: ignore[operator]
+    assert int(vacancy) > 0  # type: ignore[operator]
 
 
 def test___ge__(class_vacancy_fixture: Vacancy) -> None:
     vacancy = class_vacancy_fixture
-    assert int(vacancy) >= 400000        # type: ignore[operator]
+    assert int(vacancy) >= 400000  # type: ignore[operator]
 
 
 def test___lt__(class_vacancy_fixture: Vacancy) -> None:
     vacancy = class_vacancy_fixture
-    assert int(vacancy) < 500000         # type: ignore[operator]
+    assert int(vacancy) < 500000  # type: ignore[operator]
 
 
 def test___le__(class_vacancy_fixture: Vacancy) -> None:
     vacancy = class_vacancy_fixture
-    assert int(vacancy) < 500000         # type: ignore[operator]
+    assert int(vacancy) < 500000  # type: ignore[operator]
 
 
 def test___int__(class_vacancy_fixture: Vacancy) -> None:

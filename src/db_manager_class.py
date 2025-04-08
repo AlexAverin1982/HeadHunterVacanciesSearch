@@ -1,7 +1,7 @@
 import copy
+from copy import deepcopy
 
 import psycopg2
-from copy import deepcopy
 
 """
 Получить данные о работодателях и их вакансиях с сайта hh.ru. Для этого используйте публичный API hh.ru и библиотеку
@@ -121,30 +121,31 @@ class DBManager:
             result += str(self.__connection.dsn)
         return result
 
-    def base_exists(self, dbname: str) -> bool:
-        result = False
-        if not self.__connection:
-            old_settings = copy.deepcopy(self.__connection_settings)
-            self.__connection_settings["dbname"] = "postgres"
-            self.__connection_settings["user"] = "postgres"
-            self.__connection_settings["password"] = old_settings.get("rootpass")
-            self.connect()
-
-            if self.__error_message:
-                self.__connection_settings = old_settings
-                self.connect()
-            else:
-                query = f"SELECT true WHERE EXISTS (SELECT datname FROM pg_database where datname='{dbname}');"
-                cur = self.__connection.cursor()
-                try:
-                    cur.execute(query)
-                except psycopg2.OperationalError:
-                    self.__error_message = "Запрос о проверке существования базы данных выполнить не удалось"
-                else:
-                    result = cur.fetchone()
-                self.__connection_settings = old_settings
-                self.connect()
-        return result
+    #
+    # def base_exists(self, dbname: str) -> bool:
+    #     result = False
+    #     if not self.__connection:
+    #         old_settings = copy.deepcopy(self.__connection_settings)
+    #         self.__connection_settings["dbname"] = "postgres"
+    #         self.__connection_settings["user"] = "postgres"
+    #         self.__connection_settings["password"] = old_settings.get("rootpass")
+    #         self.connect()
+    #
+    #         if self.__error_message:
+    #             self.__connection_settings = old_settings
+    #             self.connect()
+    #         else:
+    #             query = f"SELECT true WHERE EXISTS (SELECT datname FROM pg_database where datname='{dbname}');"
+    #             cur = self.__connection.cursor()
+    #             try:
+    #                 cur.execute(query)
+    #             except psycopg2.OperationalError:
+    #                 self.__error_message = "Запрос о проверке существования базы данных выполнить не удалось"
+    #             else:
+    #                 result = cur.fetchone()
+    #             self.__connection_settings = old_settings
+    #             self.connect()
+    #     return result
 
     def create_db(self) -> None:
         """
@@ -220,7 +221,6 @@ END$$;
         cur.close()
         conn.close()
 
-        # conn = psycopg2.connect("dbname=hh user=hhuser password=123456")
         self.__connection_settings = deepcopy(old_settings)
         self.connect()
         conn = self.__connection
@@ -376,7 +376,9 @@ on v.employer_id = e.id;"""
 
         return result
 
-    def get_vacancies_with_keyword(self, keywords: str, separator: str = ",") -> list[str]:
+    def get_vacancies_with_keyword(
+        self, keywords: str, separator: str = ","
+    ) -> list[str]:
         """
         — получает список всех вакансий, в названии которых содержатся переданные в метод слова, например python.
         """
@@ -411,92 +413,116 @@ on v.employer_id = e.id;"""
         return result
 
     def insert_employer_data(
-        self, employer_data: dict | list, allow_without_vacancies: bool = True
+        self,
+        employer_data: dict | list,
+        failed_employers: list,
+        allow_without_vacancies: bool = True,
     ) -> None:
         """
         Вставляем данные (один словарь или список) о работодателе в таблицу
         """
 
-        def insert_item(employer_data_item: dict) -> None:
+        def insert_item(cur, employer_data_item: dict) -> None:
             """
             Вставляем данные об одном работодателе в таблицу
             """
-            nonlocal cur
+            # nonlocal cur
             employer_id = employer_data_item.get("id")
-            if employer_id:
-                # with self.__connection.cursor() as cursor:
-                query = f"SELECT name FROM employer WHERE id='{employer_id}';"
+            if not employer_id:
+                return
+            employer_name = employer_data_item.get("name")
+            if not employer_name:
+                failed_employers.append(employer_id)
+                return
+
+            # print(employer_id)
+            # with self.__connection.cursor() as cursor:
+            query = f"SELECT name FROM employer WHERE id='{employer_id}';"
+            cur.execute(query)
+            # try:
+            #     cur.execute(query)
+            # except:
+            #     table_is_empty = True
+
+            tablename = "employer"
+            id = employer_data_item.get("id")
+            open_vacancies = employer_data_item.get("open_vacancies")
+            separator = "||"
+
+            if not cur.rowcount:
+                if not allow_without_vacancies:
+                    if not ("open_vacancies" in employer_data_item.keys()):
+                        return
+                    elif employer_data_item["open_vacancies"] == 0:
+                        return
+                separator = ","
+                fields, values = fill_fields_and_values(
+                    employer_data_item, separator, ["open_vacancies"], []
+                )
+                fields = fields[:-1]
+                values = values[:-1]
+
+                query = f"INSERT INTO {tablename} ({fields}) VALUES ({values});"
+                try:
+                    cur.execute(query)
+                except:
+                    self.__error_message = "failed to insert new employer data"
+
+                if open_vacancies is not None:
+                    if isinstance(open_vacancies, int):
+                        if allow_without_vacancies or open_vacancies != 0:
+                            query = f"UPDATE {tablename} SET vacancies_count={open_vacancies} WHERE id='{id}';"
+                            cur.execute(query)
+            else:
+                fields, values = fill_fields_and_values(
+                    employer_data_item, separator, ["id", "open_vacancies"], []
+                )
+                # set_part_list = []
+                fields_list = fields.split(separator)[:-1]
+                values_list = values.split(separator)[:-1]
+                # for field, value in zip(fields, values):
+                #     set_part_list.append(f"{field}={value}")
+                #     set_part_str = ','.join(set_part_list)
+                set_part_list = [
+                    f"{field}={value}" for field, value in zip(fields_list, values_list)
+                ]
+                set_part_str = ",".join(set_part_list)
+                query = f"UPDATE {tablename} SET {set_part_str} WHERE id='{id}';"
                 cur.execute(query)
-
-                tablename = "employer"
-                id = employer_data_item.get("id")
-                open_vacancies = employer_data_item.get("open_vacancies")
-                separator = "||"
-
-                if not cur.rowcount:
-                    if not allow_without_vacancies:
-                        if not ("open_vacancies" in employer_data_item.keys()):
-                            return
-                        elif employer_data_item["open_vacancies"] == 0:
-                            return
-                    separator = ","
-                    fields, values = fill_fields_and_values(
-                        employer_data_item, separator, ["open_vacancies"], []
-                    )
-                    fields = fields[:-1]
-                    values = values[:-1]
-
-                    query = f"INSERT INTO {tablename} ({fields}) VALUES ({values});"
-                    cur.execute(query)
-
-                    if open_vacancies is not None:
-                        if isinstance(open_vacancies, int):
-                            if allow_without_vacancies or open_vacancies != 0:
-                                query = f"UPDATE {tablename} SET vacancies_count={open_vacancies} WHERE id='{id}';"
-                                cur.execute(query)
-                else:
-                    fields, values = fill_fields_and_values(
-                        employer_data_item, separator, ["id", "open_vacancies"], []
-                    )
-                    # set_part_list = []
-                    fields_list = fields.split(separator)[:-1]
-                    values_list = values.split(separator)[:-1]
-                    # for field, value in zip(fields, values):
-                    #     set_part_list.append(f"{field}={value}")
-                    #     set_part_str = ','.join(set_part_list)
-                    set_part_list = [
-                        f"{field}={value}"
-                        for field, value in zip(fields_list, values_list)
-                    ]
-                    set_part_str = ",".join(set_part_list)
-                    query = f"UPDATE {tablename} SET {set_part_str} WHERE id='{id}';"
-                    cur.execute(query)
-                    if open_vacancies is not None:
-                        if isinstance(open_vacancies, int):
-                            if allow_without_vacancies or open_vacancies != 0:
-                                query = f"UPDATE {tablename} SET vacancies_count={open_vacancies} WHERE id='{id}';"
-                                cur.execute(query)
+                if open_vacancies is not None:
+                    if isinstance(open_vacancies, int):
+                        if allow_without_vacancies or open_vacancies != 0:
+                            query = f"UPDATE {tablename} SET vacancies_count={open_vacancies} WHERE id='{id}';"
+                            cur.execute(query)
 
         # conn = psycopg2.connect("dbname=hh user=hhuser password=123456")
         # conn.set_client_encoding('UTF8')
-        if not self.__connection:
-            self.connect()
-        if not self.__connection:
-            self.__error_message = "Не удалось подключиться к базе данных"
-            return
-        conn = self.__connection
-        try:
-            cur = conn.cursor()
-        except psycopg2.InterfaceError:
-            self.__error_message = "Подключение потеряно"
-            return
-        conn.autocommit = True
+        self.connect()
+        cur = self.__connection.cursor()
+        self.__connection.autocommit = True
+        # connection_tries = 0
+        # while connection_tries < 10:
+        #     if not self.__connection:
+        #         self.connect()
+        #     if not self.__connection:
+        #         self.__error_message = "Не удалось подключиться к базе данных"
+        #         return
+        #     conn = self.__connection
+        #     try:
+        #         cur = self.__connection.cursor
+        #     except psycopg2.InterfaceError:
+        #         self.__error_message = "Подключение потеряно"
+        #         connection_tries += 1
+        #     else:
+        #         break
+        # self.__connection.autocommit = True
 
-        if isinstance(employer_data, dict):
-            insert_item(employer_data)
-        elif isinstance(employer_data, list):
-            for item in employer_data:
-                insert_item(item)
+        if cur:
+            if isinstance(employer_data, dict):
+                insert_item(cur, employer_data)
+            elif isinstance(employer_data, list):
+                for item in employer_data:
+                    insert_item(cur, item)
 
     def show_employers(self) -> None:
         """
@@ -530,7 +556,9 @@ on v.employer_id = e.id;"""
                     self.__connection.commit()
         """
 
-    def insert_vacancies_data(self, vacancies_data: dict | list) -> None:
+    def insert_vacancies_data(
+        self, vacancies_data: dict | list, failed_employers: list
+    ) -> None:
         """
         Добавляем/обновляем в базу данных записи о вакансиях и,если надо, о работодателях
         """
@@ -544,6 +572,8 @@ on v.employer_id = e.id;"""
 
             id = vacancy_data.get("id")
             emp_id = vacancy_data.get("employer", {}).get("id")
+            if emp_id in failed_employers:
+                return
             name = vacancy_data.get("name")
 
             conn = self.__connection
@@ -610,7 +640,10 @@ on v.employer_id = e.id;"""
             else:
                 # заранее считаем, что работодатели уже присутствуют в базе и здесь это не проверяется
                 query = f"INSERT INTO vacancy ({fields}) VALUES ({values});"
-            cur.execute(query)
+            try:
+                cur.execute(query)
+            except:
+                print(query)
 
         if isinstance(vacancies_data, dict):
             add_vacancy(vacancies_data)

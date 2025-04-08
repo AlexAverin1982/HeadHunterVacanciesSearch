@@ -44,10 +44,10 @@ class TextFileManager(StorageManager):
         return os.path.join(self.working_dir, self.filename)
 
     def load(
-        self,
-        conditions: Any | None = None,
-        fail_if_none: bool = False,
-        encoding: str = "utf-8",
+            self,
+            conditions: Any | None = None,
+            fail_if_none: bool = False,
+            encoding: str = "utf-8",
     ) -> list[dict] | None:
         """
         загрузка из файла
@@ -82,28 +82,31 @@ class TextFileManager(StorageManager):
             return None
 
     def delete(
-        self,
-        conditions: Any | None = None,
-        fail_if_none: bool = True,
-        delete_if_match: bool = False,
+            self,
+            conditions: Any | None = None,
+            delete_if_none: bool = True,
+            delete_if_match: bool = False,
+            encoding: str = "utf-8",
     ) -> None:
         """
         Удаление вакансий из файла по указанным параметрам
         :param conditions: параметры для указания вакансий, которые нужно удалить или оставить
-        :param fail_if_none: True: если свойство условия в вакансии не указано, вакансия считается неподходящей
+        :param delete_if_none: True: если свойство условия в вакансии не указано, вакансия считается неподходящей
         :param delete_if_match - Если False, вакансии, подходящие по условиям остаются в файле
+        :param encoding кодировка файла
         """
         if os.path.exists(self.full_filename()):
             if delete_if_match:
-                vacancies = self.load(fail_if_none)
+                vacancies = self.load(delete_if_none)
                 vacancies_to_save = [
                     v
                     for v in vacancies  # type: ignore[union-attr]
-                    if not vacancy_complies(v.fields(), conditions, fail_if_none)  # type: ignore[arg-type, union-attr]
+                    if not vacancy_complies(v.fields(), conditions, delete_if_none)
+                    # type: ignore[arg-type, union-attr]
                 ]
                 self.save(content={"items": vacancies_to_save}, append=False)
             else:
-                vacancies = self.load(conditions, fail_if_none)
+                vacancies = self.load(conditions, delete_if_none)
                 self.save(content={"items": vacancies}, append=False)
         else:
             raise FileNotFoundError
