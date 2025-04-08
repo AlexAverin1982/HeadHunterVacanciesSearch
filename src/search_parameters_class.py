@@ -1,0 +1,94 @@
+from copy import deepcopy
+
+from src.recordset_class import RecordSet
+
+
+class SearchParameters(RecordSet):
+    """
+    Параметры поиска вакансий
+    """
+
+    def __init__(self):  # type: ignore
+        super().__init__()
+
+        self.references_names = ["areas", "professional_roles"]
+
+        self.properties.update(
+            {
+                "page": {"value": 0},
+                "per_page": {"value": 100},
+                "text": {
+                    "id": "",
+                    "value": "",
+                    "representation": "Искать по подстроке",
+                },
+                "professional_role": {
+                    id: "",
+                    "value": "",
+                    "representation": "Профессия",
+                },
+                # 'search_field': {'id': '',
+                #                   'value': '',
+                #                   'representation': 'Искать подстроку в поле'},
+                "search_limit": {
+                    "value": 0,
+                    "representation": "Количество вакансий",
+                    "do_not_use_in_search": "uhuh",
+                },
+                "only_with_salary": {
+                    "value": True,
+                    "representation": "Игнорировать вакансии без зарплаты",
+                },
+                "auto_convert_to_rur": {
+                    "value": False,
+                    "representation": "Конвертировать зарплату в рубли автоматически",
+                    "do_not_use_in_search": "uhuh",
+                },
+            }
+        )
+
+    def params(self) -> dict:
+        """
+        Значение параметров поиска - геттер
+        """
+        result = {}
+        for property_name in self.properties.keys():
+            prop = self.properties[property_name]
+            if prop.get("id"):
+                result[property_name] = prop.get("id")
+            else:
+                val = prop.get("value")
+                if val or (val == 0):
+                    if not prop.get("do_not_use_in_search"):
+                        result[property_name] = val
+        # if self.properties['ignore_without_salary']['value']:
+        #     result['only_with_salary'] = 'true'
+        # if self.text:
+        #     result['text'] = self.text
+        # if self.search_field:
+        #     result['search_field'] = self.search_field
+        # if self.experience:
+        #     result['experience'] = self.experience
+        return result
+
+    def fields(self) -> dict:
+        """
+        Значения параметров поиска - в формате словарей headhunter.ru - геттер
+        """
+        result = deepcopy(self.properties)
+        if result.get("salary"):
+            result["salary"] = {"from": result["salary"].get("value", 0)}
+        if result.get("text"):
+            result["text"] = {"value": result["text"].get("value", 0)}
+        # result = {}
+        # for key in self.properties.keys():
+        #     if key == 'area':
+        #         result[key] = self.properties
+        return result
+
+    def __str__(self) -> str:
+        """
+        Символьное представление параметров поиска
+        """
+        result = "Параметры поиска:\n" + super().__str__()
+        return result
