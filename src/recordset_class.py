@@ -8,7 +8,7 @@ class RecordSet:
     Структурированный набор свойств для работы со справочниками и вакансиями hh
     """
 
-    def __init__(self):  # type: ignore
+    def __init__(self) -> None:  # type: ignore
         self.properties: dict = {
             "area": {
                 "id": "113",
@@ -48,7 +48,9 @@ class RecordSet:
 
         return result
 
-    def set_property(self, property_name: str, id: str = "", value: Any | str = "") -> None:
+    def set_property(
+        self, property_name: str, id: str = "", value: Any | str = ""
+    ) -> None:
         """
         Установка значения свойства по известному имени или идентификатору - сеттер
         :param property_name: имя свойства
@@ -60,13 +62,12 @@ class RecordSet:
             prop = self.properties[property_name]
             ref_name = prop.get("ref_name", property_name)
             if not HhRef.references.get(ref_name):
-                HhRef(ref_name, prop.get("subitems_name", "items"))
+                HhRef.add_reference(ref_name)
+                # HhRef(ref_name, prop.get("subitems_name", "items"))
             if id:
                 if HhRef.references[ref_name].item_code_is_valid(new_item_code=id):
                     prop["id"] = id
-                    prop["value"] = HhRef.references[ref_name].all_items_dict_by_id[id][
-                        "name"
-                    ]
+                    prop["value"] = HhRef.references[ref_name].items_by_id[id]["name"]
                 else:
                     raise ValueError
             else:
@@ -75,7 +76,7 @@ class RecordSet:
                     if HhRef.references.get(ref_name):
                         detected_id = (
                             HhRef.references[ref_name]
-                            .all_items_dict_by_name.get(value, {})
+                            .items_by_name.get(value, {})
                             .get("id")
                         )
                         if detected_id:

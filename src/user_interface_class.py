@@ -1,3 +1,4 @@
+# import getpass    глючная хрень
 import os
 
 from src.menu_class import Menu
@@ -5,6 +6,7 @@ from src.menu_class import Menu
 par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
 par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
 data_dir = os.path.join(par_dir, "data")
+settings_dir = os.path.join(par_dir, "settings")
 
 
 class UserInterface:
@@ -39,6 +41,160 @@ class UserInterface:
         Инициализация меню
         """
 
+        def init_main_menu() -> None:
+            """
+            Добавление пунктов в главное меню
+            """
+            main_menu.add_item(
+                caption="Изменить параметры поиска",
+                pos=0,
+                function=self.__change_search_params,
+            )
+            main_menu.add_item(caption="Искать вакансии", pos=1)
+
+            main_menu.add_item(
+                caption="Работать с базой данных",
+                pos=95,
+                function=self.__work_with_db_connection,
+            )
+
+            main_menu.add_item(
+                caption="Загрузить вакансии из файла",
+                pos=98,
+                function=self.__load_vacancies_from_file,
+            )
+            main_menu.add_item(
+                caption="Удалить вакансии из файла",
+                pos=97,
+                function=self.__delete_vacancies_from_file,
+            )
+
+            main_menu.add_item(caption="Выйти из программы.", pos=99)
+
+        def init_search_params_menu() -> None:
+            """
+            Добавление пунктов меню в меню параметров поиска
+            """
+            search_params_menu.add_item(
+                caption="Указать регион", pos=0, function=self.__set_area
+            )
+            search_params_menu.add_item(
+                caption="Указать минимальную зарплату",
+                pos=1,
+                function=self.__set_min_salary,
+            )
+            search_params_menu.add_item(
+                caption="Указать подстроку для поиска",
+                pos=2,
+                function=self.__set_search_substring,
+            )
+            # search_params_menu.add_item(
+            #     caption="Указать профессию", pos=3, function=self.__set_profession
+            # )
+            # search_params_menu.add_item(
+            #     caption="Указать опыт", pos=20, function=self.__set_area
+            # )
+            search_params_menu.add_item(
+                caption="Указать максимальное число вакансий",
+                pos=30,
+                function=self.__set_vacancies_list_limit,
+            )
+            search_params_menu.add_item(
+                caption="Уточнить поиск вакансий без зарплаты",
+                pos=96,
+                function=self.__set_search_without_salary_param,
+            )
+            search_params_menu.add_item(
+                caption="Установить параметры поиcка по умолчанию",
+                pos=97,
+                function=self.__reset_search_params,
+            )
+            search_params_menu.add_item(caption="Вернуться в главное меню", pos=98)
+            search_params_menu.add_item(caption="Искать вакансии", pos=99)
+
+        def init_select_area_menu() -> None:
+            """
+            Добавление пунктов меню в меню выбора региона
+            """
+            select_area_menu.add_item(
+                caption="Ввести код региона", pos=0, function=self.__type_in_area_id
+            )
+            select_area_menu.add_item(
+                caption="Подобрать регион по подстроке",
+                pos=1,
+                function=self.__search_area_by_substring,
+            )
+            select_area_menu.add_item(
+                caption="Показать все регионы, сортировать в алфавитном порядке",
+                pos=2,
+                function=self.__show_all_regions_sorted_by_name,
+            )
+            select_area_menu.add_item(
+                caption="Показать все регионы, сортировать по коду",
+                pos=3,
+                function=self.__show_all_regions_sorted_by_code,
+            )
+            select_area_menu.add_item(
+                caption="Выводить региоры по иерархии, начиная со стран",
+                pos=4,
+                function=self.__show_areas_ierarchy,
+            )
+            select_area_menu.add_item(
+                caption="Вернуться в предыдущее меню",
+                pos=5,
+                function=self.return_to_previous_menu,
+            )
+            select_area_menu.add_item(caption="Вернуться в главное меню", pos=6)
+            select_area_menu.add_item(caption="Выйти из программы.", pos=7)
+            select_area_menu.add_item(caption="Искать вакансии", pos=99)
+
+        def init_area_ierarchy_menu() -> None:
+            area_ierarchy_menu.add_item(
+                caption="Указать код региона для поиска",
+                pos=0,
+                function=self.__type_in_area_id,
+            )
+            area_ierarchy_menu.add_item(
+                caption="Указать код региона для просмотра его состава",
+                pos=1,
+                function=self.__show_subareas,
+            )
+            area_ierarchy_menu.add_item(
+                caption="Вернуться на предыдущий уровень",
+                pos=2,
+                function=self.return_to_previous_menu,
+            )
+            area_ierarchy_menu.add_item(
+                caption="Вернуться в меню параметров поиска",
+                pos=3,
+                function=self.return_two_menus_up,
+            )
+            area_ierarchy_menu.add_item(
+                caption="Вернуться в главное меню",
+                pos=4,
+                function=self.return_to_main_menu,
+            )
+
+        def init_db_menu() -> None:
+            db_menu.add_item(
+                caption="Создать базу данных", pos=0, function=self.__create_db
+            )
+            db_menu.add_item(
+                caption="Подключиться к базе данных",
+                pos=1,
+                function=self.__connect_to_db_server,
+            )
+            db_menu.add_item(
+                caption="Загрузить подключение из файла и подключиться",
+                pos=2,
+                function=self.__connect_to_db_server_from_file,
+            )
+            db_menu.add_item(
+                caption="Вернуться в главное меню",
+                pos=99,
+                function=self.return_to_main_menu,
+            )
+
         if not self.__menu_handlers:
             self.__menu_handlers = {}
 
@@ -50,27 +206,9 @@ class UserInterface:
             caption="Добро пожаловать в приложение для поиска вакансий с сайта HeadHunter.ru",
             status_bar=self.__menu_handlers.get("vacancies_count"),
         )
-
         self.__menus["main_menu"] = main_menu
+        init_main_menu()
 
-        """
-                                                    ('Указать отрасль', Application.terminate),
-                                                    ('Указать профессию', Application.terminate),
-                                                    ('Установить параметры поика по умолчанию', Application.terminate),
-        """
-
-        main_menu.add_item(
-            caption="Изменить параметры поиска",
-            pos=0,
-            function=self.__change_search_params,
-        )
-        main_menu.add_item(caption="Искать вакансии", pos=1)
-        main_menu.add_item(
-            caption="Загрузить вакансии из файла",
-            pos=98,
-            function=self.__load_vacancies_from_file,
-        )
-        main_menu.add_item(caption="Выйти из программы.", pos=99)
         # --------------------------------------------------------------------------------------------------------
         search_params_menu = Menu(
             name="change_search_params",
@@ -78,42 +216,7 @@ class UserInterface:
             status_bar=self.__menu_handlers.get("vacancies_count"),
         )
         self.__menus["change_search_params"] = search_params_menu
-        search_params_menu.add_item(
-            caption="Указать регион", pos=0, function=self.__set_area
-        )
-        search_params_menu.add_item(
-            caption="Указать минимальную зарплату",
-            pos=1,
-            function=self.__set_min_salary,
-        )
-        search_params_menu.add_item(
-            caption="Указать подстроку для поиска",
-            pos=2,
-            function=self.__set_search_substring,
-        )
-        # search_params_menu.add_item(
-        #     caption="Указать профессию", pos=3, function=self.__set_profession
-        # )
-        # search_params_menu.add_item(
-        #     caption="Указать опыт", pos=20, function=self.__set_area
-        # )
-        search_params_menu.add_item(
-            caption="Указать максимальное число вакансий",
-            pos=30,
-            function=self.__set_vacancies_list_limit,
-        )
-        search_params_menu.add_item(
-            caption="Уточнить поиск вакансий без зарплаты",
-            pos=96,
-            function=self.__set_search_without_salary_param,
-        )
-        search_params_menu.add_item(
-            caption="Установить параметры поиcка по умолчанию",
-            pos=97,
-            function=self.__reset_search_params,
-        )
-        search_params_menu.add_item(caption="Вернуться в главное меню", pos=98)
-        search_params_menu.add_item(caption="Искать вакансии", pos=99)
+        init_search_params_menu()
         #                           ('Указать отрасль', UserInterface.terminate),
         #                           ('Указать профессию', UserInterface.terminate),
         #                           ('Установить параметры поика по умолчанию', UserInterface.terminate),
@@ -121,94 +224,47 @@ class UserInterface:
         select_area_menu = Menu(
             name="select_area", caption="Как вы хотите указать регион?"
         )
-
-        select_area_menu.add_item(
-            caption="Ввести код региона", pos=0, function=self.__type_in_area_id
-        )
-        select_area_menu.add_item(
-            caption="Подобрать регион по подстроке",
-            pos=1,
-            function=self.__search_area_by_substring,
-        )
-        select_area_menu.add_item(
-            caption="Показать все регионы, сортировать в алфавитном порядке",
-            pos=2,
-            function=self.__show_all_regions_sorted_by_name,
-        )
-        select_area_menu.add_item(
-            caption="Показать все регионы, сортировать по коду",
-            pos=3,
-            function=self.__show_all_regions_sorted_by_code,
-        )
-        select_area_menu.add_item(
-            caption="Выводить региоры по иерархии, начиная со стран",
-            pos=4,
-            function=self.__show_areas_ierarchy,
-        )
-        select_area_menu.add_item(
-            caption="Вернуться в предыдущее меню",
-            pos=5,
-            function=self.return_to_previous_menu,
-        )
-        select_area_menu.add_item(caption="Вернуться в главное меню", pos=6)
-        select_area_menu.add_item(caption="Выйти из программы.", pos=7)
-        select_area_menu.add_item(caption="Искать вакансии", pos=99)
+        self.__menus["select_area"] = select_area_menu
+        init_select_area_menu()
 
         area_ierarchy_menu = Menu(
             "area_ierarchy_menu", "Регионы верхнего уровня", show_search_params=False
         )
-
         self.__menus["area_ierarchy_menu"] = area_ierarchy_menu
+        init_area_ierarchy_menu()
 
-        area_ierarchy_menu.add_item(
-            caption="Указать код региона для поиска",
-            pos=0,
-            function=self.__type_in_area_id,
+        db_menu = Menu(
+            name="db_menu",
+            caption="Работа с базой данных",
+            status_bar=self.__menu_handlers.get("db_status"),
         )
-        area_ierarchy_menu.add_item(
-            caption="Указать код региона для просмотра его состава",
-            pos=1,
-            function=self.__show_subareas,
-        )
-        area_ierarchy_menu.add_item(
-            caption="Вернуться на предыдущий уровень",
-            pos=2,
-            function=self.return_to_previous_menu,
-        )
-        area_ierarchy_menu.add_item(
-            caption="Вернуться в меню параметров поиска",
-            pos=3,
-            function=self.return_two_menus_up,
-        )
-        area_ierarchy_menu.add_item(
-            caption="Вернуться в главное меню", pos=4, function=self.return_to_main_menu
-        )
-        self.__menus["select_area"] = select_area_menu
+        self.__menus["db_menu"] = db_menu
+        init_db_menu()
 
-        profession_menu = Menu(name="profession_menu", caption="Выбор профессии")
-        self.__menus["profession_menu"] = profession_menu
-
-        profession_menu.add_item(
-            caption="Указать код профессии", pos=0, function=self.__type_in_prof_id
-        )
-        profession_menu.add_item(
-            caption="Вывести все профессии в алфавитном порядке",
-            pos=1,
-            function=self.__show_all_professions_sorted_by_name,
-        )
-        profession_menu.add_item(
-            caption="Вывести все профессии, сортировать по коду", pos=2
-        )
-        profession_menu.add_item(
-            caption="Вернуться в меню параметров поиска",
-            pos=98,
-            function=self.return_to_previous_menu,
-        )
-        profession_menu.add_item(
-            caption="Вернуться в главное меню",
-            pos=99,
-            function=self.return_to_main_menu,
-        )
+        # profession_menu = Menu(name="profession_menu", caption="Выбор профессии")
+        # self.__menus["profession_menu"] = profession_menu
+        #
+        # profession_menu.add_item(
+        #     caption="Указать код профессии", pos=0, function=self.__type_in_prof_id
+        # )
+        # profession_menu.add_item(
+        #     caption="Вывести все профессии в алфавитном порядке",
+        #     pos=1,
+        #     function=self.__show_all_professions_sorted_by_name,
+        # )
+        # profession_menu.add_item(
+        #     caption="Вывести все профессии, сортировать по коду", pos=2
+        # )
+        # profession_menu.add_item(
+        #     caption="Вернуться в меню параметров поиска",
+        #     pos=98,
+        #     function=self.return_to_previous_menu,
+        # )
+        # profession_menu.add_item(
+        #     caption="Вернуться в главное меню",
+        #     pos=99,
+        #     function=self.return_to_main_menu,
+        # )
 
         self.__menu_names = [
             "main_menu",
@@ -216,10 +272,16 @@ class UserInterface:
             "select_search_region",
             "select_area",
             "area_ierarchy_menu",
-            "profession_menu",
+            "db_menu",
+            # "profession_menu",
         ]
         self.__current_menu = self.__menus["main_menu"]
 
+        """
+                                                    ('Указать отрасль', Application.terminate),
+                                                    ('Указать профессию', Application.terminate),
+                                                    ('Установить параметры поика по умолчанию', Application.terminate),
+        """
         self.update_menu_handlers()
 
     def input_request(self, prompt: str) -> str:
@@ -258,11 +320,11 @@ class UserInterface:
         self.update_menu_handlers()
 
     def show_current_menu(
-            self,
-            info_pane: list | str = "current",
-            show_info_pane_once: bool = False,
-            enumerate_list: bool = True,
-            pause: bool = True,
+        self,
+        info_pane: list | str = "current",
+        show_info_pane_once: bool = False,
+        enumerate_list: bool = True,
+        pause: bool = True,
     ) -> None:
         """
         Отображаем текущее меню приложения
@@ -313,7 +375,7 @@ class UserInterface:
         :param menu_name: имя устанавливаемого меню
         """
         if menu_name in self.__menus.keys():
-            self.__previous_menus.append(self.__menus[self.__current_menu.menu_name()])    # type: ignore[union-attr]
+            self.__previous_menus.append(self.__menus[self.__current_menu.menu_name()])  # type: ignore[union-attr]
             self.__current_menu = self.__menus[menu_name]
 
     def return_to_main_menu(self) -> None:
@@ -377,6 +439,44 @@ class UserInterface:
                     print("Введите целое число 1-8")
             else:
                 break
+
+    def __delete_vacancies_from_file(self) -> None:
+        """
+        Удаляем вакансии из файла, используя поисковые параметры
+        """
+        print(f"Файл будет искаться в каталоге {data_dir}")
+        filename = input("Введите имя файла (введите пустую строку для отмены): ")
+        if not filename:
+            return
+        filetype_choice = "1"
+
+        delete_if_none = False
+        print("Удалять вакансии из файла, если:")
+        print("1. вакансия подходит под условия поиска")
+        print("2. вакансия НЕ ПОДХОДИТ под условия поиска")
+        user_response = input("Ваш выбор: ")
+        delete_if_match = user_response == "1"
+
+        print("Если свойство, указанное в условиях, отсутствует в описании вакансии:")
+        print("1. Удалить вакансию")
+        print("2. Оставить вакансию")
+        user_response = input("Ваш выбор: ")
+        delete_if_none = user_response == "1"
+        if filename.lower().endswith(".txt"):
+            filetype_choice = "1"
+        elif filename.lower().endswith(".csv"):
+            filetype_choice = "2"
+        elif filename.lower().endswith(".json"):
+            filetype_choice = "3"
+
+        self.__user_response = {
+            "action": "delete vacancies from file",
+            "dir": data_dir,
+            "filename": filename,
+            "filetype": filetype_choice,
+            "delete_if_none": delete_if_none,
+            "delete_if_match": delete_if_match,
+        }
 
     def __load_vacancies_from_file(self) -> None:
         """
@@ -765,6 +865,147 @@ class UserInterface:
         """
         self.__user_response = {"action": "reset search parameters"}
 
+    def __work_with_db_connection(self) -> None:
+        self.__user_response = {"action": "work with db connection"}
+
+    def request_db_connection_settings(self, request_sa_password: bool = False) -> None:
+        """
+        Запрос настроек для подключения к базе данных
+        """
+        self.__user_response = {}
+        host = port = dbname = user = password = rootpass = ""
+        host = input("Введите сетевое имя сервера баз данных(по умолчанию localhost): ")
+        if not host:
+            host = "localhost"
+        port = input("Введите номер порта сервера баз данных (по умолчанию 5432): ")
+        if not port:
+            port = "5432"
+
+        dbname = input("Введите имя базы данных: ")
+        if dbname:
+            if request_sa_password:
+                # rootpass = getpass.getpass("Введите пароль администратора базы данных: ")
+                rootpass = input("Введите пароль администратора базы данных: ")
+
+            user = input("Введите имя пользователя (по умолчанию postgres): ")
+            if not user:
+                user = "postgres"
+            if user:
+                # password = getpass.getpass("Введите пароль: ")
+                password = input("Введите пароль: ")
+                if not password:
+                    return
+        if host and port and dbname and user and password:
+            self.__user_response = {
+                "action": "connect to db",
+                "host": host,
+                "port": port,
+                "dbname": dbname,
+                "user": user,
+                "password": password,
+            }
+            if rootpass:
+                self.__user_response["rootpass"] = rootpass
+
+    def __connect_to_db_server(self) -> None:
+        """
+        Подключиться к серверу баз данных
+        """
+        self.__user_response = {}
+        self.request_db_connection_settings()
+        self.__user_response["action"] = "connect to db"
+
+    def __create_db(self) -> None:
+        # self.__user_response = {'action': 'create db',
+        #                         'host': 'localhost',
+        #                         'port': '5432',
+        #                         'user': 'user',
+        #                         'password': 'password',
+        #                         'dbname': 'dbname',
+        #                         'rootpass': 'rootpass'}
+
+        self.request_db_connection_settings(request_sa_password=True)
+        if self.__user_response:
+            self.__user_response["action"] = "create db"
+
+    def __get_employers_data(self) -> None:
+        self.__user_response = {"action": "get employers data"}
+
+    def __show_employers_and_vacancies_count(self) -> None:
+        self.__user_response = {"action": "show employers and vacancies count"}
+
+    def __save_vacancies_to_db(self) -> None:
+        self.__user_response = {"action": "save vacancies to db"}
+
+    def __save_connection_settings_to_file(self) -> None:
+        """
+        Сохраняем настройки подключения к базе данных в файл
+        """
+        self.__user_response = {
+            "action": "save connection settings to file",
+            "dir": settings_dir,
+            "filename": input("Введите имя файла: "),
+        }
+        if not self.__user_response["filename"]:
+            self.__user_response = {}
+
+    def __connect_to_db_server_from_file(self) -> None:
+        """
+        Загружаем настройки подключения к базе данных из файла и подключаемся
+        """
+        self.__user_response = {
+            "action": "load connection settings from file",
+            "dir": settings_dir,
+            "filename": input("Введите имя файла: "),
+        }
+        if not self.__user_response["filename"]:
+            self.__user_response["filename"] = "hh.json"
+
+    def __show_all_vacancies(self) -> None:
+        """
+        Показываем все вакансии из базы данных
+        """
+        self.__user_response = {"action": "show all vacancies"}
+
+    def __show_average_salary_in_db(self) -> None:
+        """
+        Показываем среднюю зарплату по всем вакансиям в базе данных
+        """
+        self.__user_response = {"action": "show average salary in db"}
+
+    def __show_vacancies_higher_than_avg(self) -> None:
+        """
+        Показываем вакансии с зарплатой выше средней
+        """
+        self.__user_response = {
+            "action": "show vacancies with salary higher than average"
+        }
+
+    def __show_vacancies_with_keywords(self) -> None:
+        """
+        Показываем вакансии, содержащие в названии ключевые слова
+        """
+        keywords = []
+        while True:
+            keyword = input(
+                "Введите ключевое слово (пустую строку, чтобы закончить ввод): "
+            )
+            if keyword:
+                keywords.append(keyword)
+            else:
+                break
+
+        separator = input("Введите разделитель (запятая по умолчанию): ")
+        if not separator:
+            separator = ","
+        keywords_str = separator.join(keywords)
+
+        self.__user_response = {
+            "action": "show vacancies with keywords",
+            "keywords": keywords_str,
+            "separator": separator,
+        }
+
     def shrink_main_menu(self) -> None:
         """
         Убираем пункты главного меню, когда список вакансий пуст, с ним действий нет
@@ -776,6 +1017,79 @@ class UserInterface:
         self.__menus["main_menu"].delete_item("Сохранить найденные вакансии в файл")
         self.__menus["main_menu"].delete_item("Топ N вакансий по зарплате")
         self.__menus["main_menu"].delete_item("Удалить вакансии из результатов поиска")
+
+    def shrink_db_menu(self) -> None:
+        """
+        Удаляем часть пунктов меню работы с базами данных, если подключения к серверу бд нет
+        """
+        self.__menus["db_menu"].delete_item("Загрузить информацию о работодателях")
+        self.__menus["db_menu"].delete_item(
+            "Показать работодателей и количество их вакансий"
+        )
+        self.__menus["db_menu"].delete_item("Сохранить вакансии в базу данных")
+        self.__menus["db_menu"].delete_item("Сохранить настройки подключения в файл")
+        self.__menus["db_menu"].delete_item("Показать все вакансии из базы данных")
+        self.__menus["db_menu"].delete_item("Показать среднюю зарплату по базе данных")
+        self.__menus["db_menu"].delete_item(
+            "Показать вакансии с зарплатой выше средней"
+        )
+        self.__menus["db_menu"].delete_item(
+            "Показать вакансии, содержащие ключевые слова"
+        )
+
+    def extend_db_menu(self, vacancies_present: bool) -> None:
+        """
+        Добавляем пункты меню работы с базами данных, когда подключение к серверу бд установлено
+        """
+
+        self.__menus["db_menu"].add_item(
+            caption="Загрузить информацию о работодателях",
+            pos=97,
+            function=self.__get_employers_data,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Показать все вакансии из базы данных",
+            pos=2,
+            function=self.__show_all_vacancies,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Показать среднюю зарплату по базе данных",
+            pos=3,
+            function=self.__show_average_salary_in_db,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Показать вакансии с зарплатой выше средней",
+            pos=4,
+            function=self.__show_vacancies_higher_than_avg,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Показать вакансии, содержащие ключевые слова",
+            pos=5,
+            function=self.__show_vacancies_with_keywords,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Показать работодателей и количество их вакансий",
+            pos=10,
+            function=self.__show_employers_and_vacancies_count,
+        )
+
+        self.__menus["db_menu"].add_item(
+            caption="Сохранить настройки подключения в файл",
+            pos=99,
+            function=self.__save_connection_settings_to_file,
+        )
+
+        if vacancies_present:
+            self.__menus["db_menu"].add_item(
+                caption="Сохранить вакансии в базу данных",
+                pos=98,
+                function=self.__save_vacancies_to_db,
+            )
 
     def user_response(self) -> dict:
         """

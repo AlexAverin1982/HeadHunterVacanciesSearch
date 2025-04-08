@@ -6,23 +6,27 @@ from src.user_interface_class import UserInterface
 
 output: list = []
 input_values: list = []
+par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
+par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
+data_dir = os.path.join(par_dir, "data")
+settings_dir = os.path.join(par_dir, "settings")
 
 
 def test_init__(class_user_interface_fixture: UserInterface) -> None:
     ui = class_user_interface_fixture
-    assert set(ui._UserInterface__menus.keys()) == {        # type: ignore[attr-defined]
-        "main_menu",
-        "change_search_params",
-        "select_area",
+    assert set(ui._UserInterface__menus.keys()) == {  # type: ignore[attr-defined]
         "area_ierarchy_menu",
-        "profession_menu",
+        "change_search_params",
+        "db_menu",
+        "main_menu",
+        "select_area",
     }
 
 
 def test_extend_main_menu() -> None:
     ui = UserInterface()
     ui.extend_main_menu()
-    main_menu = ui._UserInterface__menus["main_menu"]       # type: ignore[attr-defined]
+    main_menu = ui._UserInterface__menus["main_menu"]  # type: ignore[attr-defined]
     items = str(main_menu).split("\n")
     assert items == [
         "1. Изменить параметры поиска",
@@ -34,17 +38,19 @@ def test_extend_main_menu() -> None:
         "7. Удалить вакансии из результатов поиска",
         "8. Сохранить найденные вакансии в файл",
         "9. Топ N вакансий по зарплате",
-        "10. Загрузить вакансии из файла",
-        "11. Выйти из программы.",
+        "10. Работать с базой данных",
+        "11. Загрузить вакансии из файла",
+        "12. Удалить вакансии из файла",
+        "13. Выйти из программы.",
         "",
         "",
     ]
 
 
 def test_show_current_menu() -> None:
-    output: list  = []
+    output: list = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
     ui.set_current_menu("main_menu")
@@ -58,7 +64,7 @@ def test_show_current_menu() -> None:
 def test_show_current_menu2() -> None:
     output = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
     ui.set_current_menu("main_menu")
@@ -72,7 +78,7 @@ def test_show_current_menu2() -> None:
 def test_show_current_menu_with_info_pane() -> None:
     output = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
     ui.set_current_menu("main_menu")
@@ -102,7 +108,7 @@ def test_show_current_menu_with_info_pane() -> None:
 def test_return_to_main_menu() -> None:
     output = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
 
@@ -122,7 +128,7 @@ def test_return_to_main_menu() -> None:
 def test_return_to_previous_menu() -> None:
     output = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
 
@@ -158,7 +164,7 @@ def test_return_to_previous_menu() -> None:
 def test_return_two_menus_up() -> None:
     output = []
     ui = UserInterface()
-    src.user_interface_class.print = lambda s: output.append(       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
         s
     )  # если надо, можем посмотреть, что выводилось в консоль
 
@@ -183,48 +189,44 @@ def test_return_two_menus_up() -> None:
 
 def mock_input(s: str) -> str:  # мокаем ввод пунктов меню
     """Мокаем пользовательский ввод с клавиатуры"""
-    global output
-    global input_values
     output.append(s)
     return str(input_values.pop(0))
 
 
 def test_sort_vacancies() -> None:
     global input_values
-    global output
 
     ui = UserInterface()
 
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     # input_values = [str(user_response) for user_response in range(1,10)]
     # input_values = []
     for user_response in range(1, 9):
         input_values = [str(user_response)]
-        ui._UserInterface__sort_vacancies()     # type: ignore[attr-defined]
+        ui._UserInterface__sort_vacancies()  # type: ignore[attr-defined]
         assert ui.user_response() == {
             "action": "sort vacancies",
             "sort_mode": user_response,
         }
 
     input_values = ["9", ""]
-    ui._UserInterface__sort_vacancies()     # type: ignore[attr-defined]
+    ui._UserInterface__sort_vacancies()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "sort vacancies", "sort_mode": 8}
 
 
 def test_load_vacancies_from_file() -> None:
     global input_values
-    global output
     par_dir = os.path.abspath(os.path.join(__file__, os.pardir))
     par_dir = os.path.abspath(os.path.join(par_dir, os.pardir))
     data_dir = os.path.join(par_dir, "data")
 
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = [
         "test6.json",
         "2",
     ]
-    ui._UserInterface__load_vacancies_from_file()       # type: ignore[attr-defined]
+    ui._UserInterface__load_vacancies_from_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "load vacancies from file",
         "dir": data_dir,
@@ -235,10 +237,10 @@ def test_load_vacancies_from_file() -> None:
     }
     input_values = [""]
     ui.clear_user_response()
-    ui._UserInterface__load_vacancies_from_file()       # type: ignore[attr-defined]
+    ui._UserInterface__load_vacancies_from_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {}
     input_values = ["test6.txt", "1", "1"]
-    ui._UserInterface__load_vacancies_from_file()       # type: ignore[attr-defined]
+    ui._UserInterface__load_vacancies_from_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "load vacancies from file",
         "dir": data_dir,
@@ -248,7 +250,7 @@ def test_load_vacancies_from_file() -> None:
         "fails if none": True,
     }
     input_values = ["test6.csv", "1", "2"]
-    ui._UserInterface__load_vacancies_from_file()       # type: ignore[attr-defined]
+    ui._UserInterface__load_vacancies_from_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "load vacancies from file",
         "dir": data_dir,
@@ -261,34 +263,34 @@ def test_load_vacancies_from_file() -> None:
 
 def test_find_vacancies() -> None:
     ui = UserInterface()
-    ui._UserInterface__find_vacancies()     # type: ignore[attr-defined]
+    ui._UserInterface__find_vacancies()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "find vacancies"}
 
 
 def test_type_in_area_id() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["113"]
-    ui._UserInterface__type_in_area_id()        # type: ignore[attr-defined]
+    ui._UserInterface__type_in_area_id()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "set area id", "id": "113"}
 
 
 def test_type_in_prof_id() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
-    ui._UserInterface__type_in_prof_id()        # type: ignore[attr-defined]
+    ui._UserInterface__type_in_prof_id()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "set prof id", "prof_id": "1"}
 
 
 def test_search_area_by_substring() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["Тамбов"]
-    ui._UserInterface__search_area_by_substring()       # type: ignore[attr-defined]
+    ui._UserInterface__search_area_by_substring()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "search area by substring",
         "substring": "тамбов",
@@ -297,58 +299,58 @@ def test_search_area_by_substring() -> None:
 
 def test_show_all_regions_sorted_by_name() -> None:
     ui = UserInterface()
-    ui._UserInterface__show_all_regions_sorted_by_name()        # type: ignore[attr-defined]
+    ui._UserInterface__show_all_regions_sorted_by_name()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show all regions sorted by name"}
 
 
 def test_show_all_regions_sorted_by_code() -> None:
     ui = UserInterface()
-    ui._UserInterface__show_all_regions_sorted_by_code()        # type: ignore[attr-defined]
+    ui._UserInterface__show_all_regions_sorted_by_code()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show all regions sorted by code"}
 
 
 def test_set_search_substring() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["Тамбов"]
-    ui._UserInterface__set_search_substring()       # type: ignore[attr-defined]
+    ui._UserInterface__set_search_substring()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "search vacancies by substring",
         "substring": "тамбов",
     }
 
 
-def test_set_profession() -> None:
-    ui = UserInterface()
-    output: list = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
-    ui._UserInterface__set_profession()     # type: ignore[attr-defined]
-    ui.show_current_menu()
-    assert output[1] == "Выбор профессии"
+# def test_set_profession() -> None:
+#     ui = UserInterface()
+#     output: list = []
+#     src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
+#     ui._UserInterface__set_profession()  # type: ignore[attr-defined]
+#     ui.show_current_menu()
+#     assert output[1] == "Выбор профессии"
 
 
 def test_set_vacancies_list_limit() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
-    ui._UserInterface__set_vacancies_list_limit()       # type: ignore[attr-defined]
+    ui._UserInterface__set_vacancies_list_limit()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "set vacancies list limit", "limit": 1}
     input_values = [""]
     ui.clear_user_response()
-    ui._UserInterface__set_vacancies_list_limit()       # type: ignore[attr-defined]
+    ui._UserInterface__set_vacancies_list_limit()  # type: ignore[attr-defined]
     assert ui.user_response() == {}
     input_values = ["fnbrtntn", ""]
     output = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
-    ui._UserInterface__set_vacancies_list_limit()       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
+    ui._UserInterface__set_vacancies_list_limit()  # type: ignore[attr-defined]
     assert output[0] == "Введите целое число или пустую строку для отмены"
 
 
 def test_filter_vacancies() -> None:
     ui = UserInterface()
-    ui._UserInterface__filter_vacancies()       # type: ignore[attr-defined]
+    ui._UserInterface__filter_vacancies()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "filter vacancies"}
 
 
@@ -357,12 +359,12 @@ def test_show_message() -> None:
     global output
     ui = UserInterface()
     output = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
     ui.show_message("test", pause=False)
     ui.show_current_menu()
     assert output[0] == "test"
     input_values = ["\n"]
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     output = []
     ui.show_message("test", pause=True)
     assert (output[0] == "test") and (output[1] == "Нажмите Enter")
@@ -371,7 +373,7 @@ def test_show_message() -> None:
 def test_ask_vacancies_list_not_empty_when_loading_from_file() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
     ui.ask_vacancies_list_not_empty_when_loading_from_file()
     assert ui.user_response() == {"clear vacancies list": False}
@@ -380,7 +382,7 @@ def test_ask_vacancies_list_not_empty_when_loading_from_file() -> None:
 def test_ask_vacancies_list_not_empty_when_searching_anew() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
     ui.ask_vacancies_list_not_empty_when_searching_anew()
     assert ui.user_response() == {"очистить список вакансий": False}
@@ -389,10 +391,10 @@ def test_ask_vacancies_list_not_empty_when_searching_anew() -> None:
 def test_respond() -> None:
     ui = UserInterface()
     output = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
     ui.return_to_main_menu()
     ui.respond("1")
-    assert ui._UserInterface__current_menu.caption == "Укажите параметры поиска:"       # type: ignore[attr-defined]
+    assert ui._UserInterface__current_menu.caption == "Укажите параметры поиска:"  # type: ignore[attr-defined]
     ui.clear_user_response()
     ui.respond("1111")
     assert output == ["Такого пункта в меню нет."]
@@ -403,7 +405,7 @@ def test_update_menu_handlers() -> None:
         print("hi!")
 
     output: list = []
-    print = lambda s: output.append(s)      # type: ignore[attr-defined]
+    print = lambda s: output.append(s)  # type: ignore[attr-defined]
     menu_handlers = {"Изменить параметры поиска": say_hi}
     ui = UserInterface(menu_handlers)
     ui.update_menu_handlers()
@@ -416,8 +418,8 @@ def test_change_search_params() -> None:
     ui = UserInterface()
     ui.return_to_main_menu()
     output: list = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
-    ui._UserInterface__change_search_params()       # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
+    ui._UserInterface__change_search_params()  # type: ignore[attr-defined]
     ui.show_current_menu()
     assert output[1] == "Укажите параметры поиска:"
 
@@ -425,33 +427,33 @@ def test_change_search_params() -> None:
 def test_ask_vacancies_details() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["2", "1-10"]
-    ui._UserInterface__ask_vacancies_details()      # type: ignore[attr-defined]
+    ui._UserInterface__ask_vacancies_details()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show vacancies details", "indices": "1-10"}
     input_values = ["2", ""]
-    ui._UserInterface__ask_vacancies_details()      # type: ignore[attr-defined]
+    ui._UserInterface__ask_vacancies_details()  # type: ignore[attr-defined]
     assert ui.user_response() == {}
 
 
 def test_set_area() -> None:
     ui = UserInterface()
-    ui._UserInterface__set_area()       # type: ignore[attr-defined]
-    assert ui._UserInterface__current_menu.caption == "Как вы хотите указать регион?"   # type: ignore[attr-defined]
+    ui._UserInterface__set_area()  # type: ignore[attr-defined]
+    assert ui._UserInterface__current_menu.caption == "Как вы хотите указать регион?"  # type: ignore[attr-defined]
 
 
 def test_show_areas_ierarchy() -> None:
     ui = UserInterface()
-    ui._UserInterface__show_areas_ierarchy()        # type: ignore[attr-defined]
+    ui._UserInterface__show_areas_ierarchy()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show area ierarchy"}
 
 
 def test_show_subareas() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["32"]
-    ui._UserInterface__show_subareas()      # type: ignore[attr-defined]
+    ui._UserInterface__show_subareas()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show subareas", "parent": "32"}
 
 
@@ -460,10 +462,10 @@ def test_set_min_salary() -> None:
     global output
     output = []
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
     input_values = ["wg3wgr", "1000"]
-    ui._UserInterface__set_min_salary()     # type: ignore[attr-defined]
+    ui._UserInterface__set_min_salary()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "set min salary", "salary": 1000} and (
         output[1] == "Введите целое число"
     )
@@ -472,9 +474,9 @@ def test_set_min_salary() -> None:
 def test_set_search_without_salary_param() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
-    ui._UserInterface__set_search_without_salary_param()        # type: ignore[attr-defined]
+    ui._UserInterface__set_search_without_salary_param()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "set search without salary param",
         "value": True,
@@ -487,9 +489,9 @@ def test_save_vacancies_to_file() -> None:
     data_dir = os.path.join(par_dir, "data")
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["test6.json", "1"]
-    ui._UserInterface__save_vacancies_to_file()     # type: ignore[attr-defined]
+    ui._UserInterface__save_vacancies_to_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "save vacancies to file",
         "dir": data_dir,
@@ -499,10 +501,10 @@ def test_save_vacancies_to_file() -> None:
     }
     ui.clear_user_response()
     input_values = [""]
-    ui._UserInterface__save_vacancies_to_file()     # type: ignore[attr-defined]
+    ui._UserInterface__save_vacancies_to_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {}
     input_values = ["test6.csv", "2"]
-    ui._UserInterface__save_vacancies_to_file()     # type: ignore[attr-defined]
+    ui._UserInterface__save_vacancies_to_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "save vacancies to file",
         "dir": data_dir,
@@ -513,7 +515,7 @@ def test_save_vacancies_to_file() -> None:
     ui.clear_user_response()
     output: list = []
     input_values = ["test.txt", "2"]
-    ui._UserInterface__save_vacancies_to_file()     # type: ignore[attr-defined]
+    ui._UserInterface__save_vacancies_to_file()  # type: ignore[attr-defined]
     assert ui.user_response() == {
         "action": "save vacancies to file",
         "dir": data_dir,
@@ -523,9 +525,9 @@ def test_save_vacancies_to_file() -> None:
     }
     ui.clear_user_response()
     output = []
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
     input_values = ["test6", "sh.csv", "3"]
-    ui._UserInterface__save_vacancies_to_file()     # type: ignore[attr-defined]
+    ui._UserInterface__save_vacancies_to_file()  # type: ignore[attr-defined]
     assert (
         (output[1] == "Желаемый формат для сохранения файла не определен.")
         and (output[2] == "Укажите имя файла с расширением через точку")
@@ -535,9 +537,9 @@ def test_save_vacancies_to_file() -> None:
 def test_delete_vacancies() -> None:
     global input_values
     ui = UserInterface()
-    src.user_interface_class.input = mock_input         # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
     input_values = ["1"]
-    ui._UserInterface__delete_vacancies()           # type: ignore[attr-defined]
+    ui._UserInterface__delete_vacancies()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "delete vacancies", "indices": "1"}
 
 
@@ -545,10 +547,10 @@ def test_top_n_vacancies() -> None:
     global input_values
     ui = UserInterface()
     output = []
-    src.user_interface_class.input = mock_input         # type: ignore[attr-defined]
-    src.user_interface_class.print = lambda s: output.append(s)     # type: ignore[attr-defined]
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    src.user_interface_class.print = lambda s: output.append(s)  # type: ignore[attr-defined]
     input_values = ["erehg4", "10"]
-    ui._UserInterface__top_n_vacancies()            # type: ignore[attr-defined]
+    ui._UserInterface__top_n_vacancies()  # type: ignore[attr-defined]
     assert (ui.user_response() == {"action": "show top", "count": 10}) and (
         output == ["Введите целое число"]
     )
@@ -556,7 +558,7 @@ def test_top_n_vacancies() -> None:
 
 def test_show_all_professions_sorted_by_name() -> None:
     ui = UserInterface()
-    ui._UserInterface__show_all_professions_sorted_by_name()            # type: ignore[attr-defined]
+    ui._UserInterface__show_all_professions_sorted_by_name()  # type: ignore[attr-defined]
     assert ui.user_response() == {"action": "show all professions sorted by name"}
 
 
@@ -564,13 +566,15 @@ def test_shrink_main_menu() -> None:
     ui = UserInterface()
     ui.extend_main_menu()
     ui.shrink_main_menu()
-    main_menu = ui._UserInterface__menus["main_menu"]       # type: ignore[attr-defined]
+    main_menu = ui._UserInterface__menus["main_menu"]  # type: ignore[attr-defined]
     items = str(main_menu).split("\n")
     assert items == [
         "1. Изменить параметры поиска",
         "2. Искать вакансии",
-        "3. Загрузить вакансии из файла",
-        "4. Выйти из программы.",
+        "3. Работать с базой данных",
+        "4. Загрузить вакансии из файла",
+        "5. Удалить вакансии из файла",
+        "6. Выйти из программы.",
         "",
         "",
     ]
@@ -586,3 +590,279 @@ def test_clear_user_response() -> None:
     ui = UserInterface()
     ui.clear_user_response()
     assert ui.user_response() == {}
+
+
+def test_request_db_connection_settings() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = [
+        "",
+        "",
+        "hh",
+        "----",
+        "hhuser",
+        "123456",
+    ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "connect to db",
+        "host": "localhost",
+        "port": "5432",
+        "rootpass": "----",
+        "dbname": "hh",
+        "user": "hhuser",
+        "password": "123456",
+    }
+    input_values = [
+        "",
+        "",
+        "hh",
+        "----",
+        "",
+        "123456",
+    ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "connect to db",
+        "host": "localhost",
+        "port": "5432",
+        "rootpass": "----",
+        "dbname": "hh",
+        "user": "postgres",
+        "password": "123456",
+    }
+    input_values = [
+        "",
+        "",
+        "hh",
+        "",
+        "",
+        "",
+    ]
+    ui.request_db_connection_settings(request_sa_password=True)  # type: ignore[attr-defined]
+    assert ui.user_response() == {}
+
+
+def test_connect_to_db_server() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = [
+        "",
+        "",
+        "hh",
+        "hhuser",
+        "123456",
+    ]
+
+    ui = UserInterface()
+    ui._UserInterface__connect_to_db_server()  # type: ignore[attr-defined]
+
+    assert ui.user_response() == {
+        "action": "connect to db",
+        "host": "localhost",
+        "port": "5432",
+        "dbname": "hh",
+        "user": "hhuser",
+        "password": "123456",
+    }
+
+
+def test_create_db() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    ui = UserInterface()
+    input_values = [
+        "",
+        "",
+        "hh",
+        "Sa_password=",
+        "hhuser",
+        "123456",
+        "",
+        "",
+        "hh",
+        "hhuser",
+        "123456",
+    ]
+    ui._UserInterface__create_db()  # type: ignore[attr-defined]
+
+    assert ui.user_response() == {
+        "action": "create db",
+        "dbname": "hh",
+        "host": "localhost",
+        "password": "123456",
+        "port": "5432",
+        "user": "hhuser",
+        "rootpass": "Sa_password=",
+    }
+
+
+def test_get_employers_data() -> None:
+    ui = UserInterface()
+    ui._UserInterface__get_employers_data()  # type: ignore[attr-defined]
+    assert ui.user_response() == {"action": "get employers data"}
+
+
+def test_show_employers_and_vacancies_count() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_employers_and_vacancies_count()  # type: ignore[attr-defined]
+    assert ui.user_response() == {"action": "show employers and vacancies count"}
+
+
+def test_save_vacancies_to_db() -> None:
+    ui = UserInterface()
+    ui._UserInterface__save_vacancies_to_db()  # type: ignore[attr-defined]
+    assert ui.user_response() == {"action": "save vacancies to db"}
+
+
+def test_save_connection_settings_to_file() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_filename.txt"]
+    ui._UserInterface__save_connection_settings_to_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "save connection settings to file",
+        "dir": settings_dir,
+        "filename": "test_filename.txt",
+    }
+
+    input_values = [""]
+    ui._UserInterface__save_connection_settings_to_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {}
+
+
+def test_connect_to_db_server_from_file() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_filename.txt"]
+    ui._UserInterface__connect_to_db_server_from_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "load connection settings from file",
+        "dir": settings_dir,
+        "filename": "test_filename.txt",
+    }
+
+    input_values = [""]
+    ui._UserInterface__connect_to_db_server_from_file()  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "load connection settings from file",
+        "dir": settings_dir,
+        "filename": "hh.json",
+    }
+
+
+def test_show_all_vacancies() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_all_vacancies()  # type: ignore[attr-defined]
+    assert ui.user_response() == {"action": "show all vacancies"}
+
+
+def test_show_average_salary_in_db() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_average_salary_in_db()  # type: ignore[attr-defined]
+    assert ui.user_response() == {"action": "show average salary in db"}
+
+
+def test_show_vacancies_higher_than_avg() -> None:
+    ui = UserInterface()
+    ui._UserInterface__show_vacancies_higher_than_avg()  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "show vacancies with salary higher than average"
+    }
+
+
+def test_show_vacancies_with_keywords() -> None:
+    global input_values
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["word1", "word2", "word3", "word4", "", ""]
+    ui._UserInterface__show_vacancies_with_keywords()  # type: ignore[attr-defined]
+    assert ui.user_response() == {
+        "action": "show vacancies with keywords",
+        "keywords": "word1,word2,word3,word4",
+        "separator": ",",
+    }
+
+
+def test_shrink_db_menu() -> None:
+    ui = UserInterface()
+    ui.extend_db_menu(False)
+    ui.shrink_db_menu()
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == [
+        "1. Создать базу данных",
+        "2. Подключиться к базе данных",
+        "3. Загрузить подключение из файла и подключиться",
+        "4. Вернуться в главное меню",
+        "",
+        "",
+    ]
+
+
+def test_extend_db_menu() -> None:
+    ui = UserInterface()
+    ui.extend_db_menu(False)
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == [
+        "1. Создать базу данных",
+        "2. Подключиться к базе данных",
+        "3. Показать все вакансии из базы данных",
+        "4. Показать среднюю зарплату по базе данных",
+        "5. Показать вакансии с зарплатой выше средней",
+        "6. Показать вакансии, содержащие ключевые слова",
+        "7. Загрузить подключение из файла и подключиться",
+        "8. Вернуться в главное меню",
+        "9. Загрузить информацию о работодателях",
+        "10. Показать работодателей и количество их вакансий",
+        "11. Сохранить настройки подключения в файл",
+        "",
+        "",
+    ]
+    ui.shrink_db_menu()
+    ui.extend_db_menu(True)
+    db_menu = ui._UserInterface__menus["db_menu"]  # type: ignore[attr-defined]
+    items = str(db_menu).split("\n")
+    assert items == [
+        "1. Создать базу данных",
+        "2. Подключиться к базе данных",
+        "3. Показать все вакансии из базы данных",
+        "4. Показать среднюю зарплату по базе данных",
+        "5. Показать вакансии с зарплатой выше средней",
+        "6. Показать вакансии, содержащие ключевые слова",
+        "7. Загрузить подключение из файла и подключиться",
+        "8. Вернуться в главное меню",
+        "9. Загрузить информацию о работодателях",
+        "10. Показать работодателей и количество их вакансий",
+        "11. Сохранить настройки подключения в файл",
+        "12. Сохранить вакансии в базу данных",
+        "",
+        "",
+    ]
+
+
+# def test_set_profession(self):
+#     ui = UserInterface()
+#     ui._UserInterface__set_profession()  # type: ignore[attr-defined]
+#     assert True
+
+
+def test_input_request() -> None:
+    global input_values
+    output: list = []
+    ui = UserInterface()
+    src.user_interface_class.print = lambda s: output.append(  # type: ignore[attr-defined]
+        s
+    )  # если надо, можем посмотреть, что выводилось в консоль
+
+    ui = UserInterface()
+    src.user_interface_class.input = mock_input  # type: ignore[attr-defined]
+    input_values = ["test_input"]
+    result = ui.input_request("input prompt")  # type: ignore[attr-defined]
+    assert result == "test_input"

@@ -1,3 +1,8 @@
+import json
+import os.path
+from copy import deepcopy
+
+from src.db_manager_class import DBManager
 from src.hh_reference_class import HeadHunterReference as HhRef
 from src.json_file_manager import JSONFileManager
 from src.misc_tools import get_indices, vacancy_complies
@@ -19,7 +24,7 @@ class Application:
     @classmethod
     def terminate(cls) -> None:
         """
-        завершение работы приложения
+        Завершение работы приложения
         """
         cls.work_is_over = True
 
@@ -28,6 +33,8 @@ class Application:
         self.search_params = SearchParameters()
         self.search_engine = VacanciesSearchEngine()
         self.vacancies = []
+        self.db_manager = DBManager()
+
         # self.vacancies_by_id = {}
 
         """
@@ -40,15 +47,7 @@ class Application:
         menu_handlers = {
             "Выйти из программы.": Application.terminate,
             "vacancies_count": self.vacancies_count,
-            # 'Найти вакансии': self.find_vacancies,
-            # 'Загрузить вакансии из файла': self.load_vacancies_from_file,
-            # 'Просмотреть найденные вакансии': self.show_vacancies_list,
-            # 'Показать вакансии детально': self.show_details,
-            # 'Отфильтровать найденные вакансии': self.filter_found_vacancies,
-            # 'Отсортировать найденные вакансии': self.sort_vacancies_list,
-            # 'Удалить вакансии из результатов поиска': self.delete_vacancies,
-            # 'Сохранить найденные вакансии в файл': self.save_vacancies_to_file,
-            # 'Топ N вакансий по зарплате': self.show_top,
+            "db_status": self.db_connection_status,
         }
 
         self.user_interface = UserInterface(menu_handlers)
@@ -58,6 +57,21 @@ class Application:
         количество вакансий для строки статуса
         """
         return f"Сейчас найдено {len(self.vacancies)} вакансий"
+
+    def db_connection_status(self) -> str:
+        """
+        статусная строка для работы с базами данных
+        """
+        return str(self.db_manager.connection_status())
+
+    def db_connection_settings(self) -> str:
+        """
+        статусная строка для работы с базами данных
+        """
+        result = str(self.db_manager)
+        if result == "":
+            result = "Подключение к серверу баз данных не настроено\n"
+        return result
 
     def filter_found_vacancies(self) -> None:
         """
@@ -106,12 +120,71 @@ class Application:
         if not indices_str:
             indices = range(len(self.vacancies))  # показываем все
         else:
-            indices = get_indices(indices_str, len(self.vacancies))  # выбранные        # type: ignore[assignment]
+            indices = get_indices(
+                indices_str, len(self.vacancies)
+            )  # выбранные        # type: ignore[assignment]
 
         details = [self.vacancies[ind].details() for ind in indices]
         self.user_interface.show_current_menu(
             info_pane=details, show_info_pane_once=True
         )
+
+    def connect_to_db(self) -> None:
+        self.db_manager.connect()
+        if self.db_manager.error_message:
+            self.user_interface.show_message(self.db_manager.error_message)
+        else:
+            self.user_interface.extend_db_menu(
+                vacancies_present=(len(self.vacancies) > 0)
+            )
+            self.user_interface.show_current_menu(info_pane=str(self.db_manager))
+
+    def load_db_connection_settings_from_file(self, filename: str, dir: str) -> None:
+        fullname = os.path.join(dir, filename)
+        if os.path.exists(fullname):
+            with open(fullname, "r", encoding="utf-8") as f:
+                self.db_manager.connection_settings = json.load(f)
+        else:
+            self.user_interface.show_message(
+                f"Файл {fullname} не найден. Подлкючение не установлено."
+            )
+
+    def load_employers_data(self) -> None:
+        """
+        Загружаем данные о работодателях с сайта в справочник в сохраняем в базу данных
+        """
+        if not HhRef.references.get("employers"):
+            prompt = "Загружать работодателей без вакансий?\n1. Да\n2. Нет"
+            add_without_vacancies = self.user_interface.input_request(prompt) == "1"
+            HhRef.add_reference(
+                "employers", allow_without_vacancies=add_without_vacancies
+            )
+        if not HhRef.references.get("employers"):
+            self.user_interface.show_message(
+                "Данные о работодателях не удалось загрузить с сайта"
+            )
+        else:
+            employers_data = HhRef.references.get("employers").items_by_id.items()  # type: ignore[union-attr]
+            data = []
+            for employer_id, employer_data in employers_data:
+                employer_data.update({"id": employer_id})
+                data.append(employer_data)
+
+            if self.db_manager.connected():
+                failed_employers: list[str] = []
+                self.db_manager.insert_employer_data(data, failed_employers)
+                self.db_manager.show_employers()
+
+        #         if not self.db_manager.connection_settings:
+        #             self.user_interface.request_db_connection_settings()
+        #         self.db_manager.connect()
+        #         if self.db_manager.error_message:
+        #             self.user_interface.show_message(self.db_manager.error_message)
+        #             self.db_manager.show_employers()
+        #             return
+        #
+        #     self.db_manager.insert_employer_data(data)
+        # self.db_manager.show_employers()
 
     def save_vacancies_to_file(
             self,
@@ -157,7 +230,7 @@ class Application:
             file_manager = JSONFileManager(  # type: ignore[assignment]
                 storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict
             )
-            content = {"items": self.vacancies}  # type: ignore[assignment]
+            content = {"items": deepcopy(self.vacancies)}  # type: ignore[assignment]
 
         if file_manager and content:
             file_manager.save(content=content, append=append)
@@ -213,6 +286,8 @@ class Application:
         if len(self.vacancies):
             self.user_interface.extend_main_menu()
             self.user_interface.return_to_main_menu()
+            if self.db_manager.connected():
+                self.user_interface.extend_db_menu(vacancies_present=True)
 
     def search_area_by_substring(self, substring: str) -> None:
         """
@@ -220,14 +295,17 @@ class Application:
         :param substring: подстрока в названии региона
         """
         if not HhRef.references.get("areas"):
-            HhRef("areas", "areas")
-        areas = HhRef.references.get("areas").all_items_dict_by_name  # type: ignore[union-attr]
+            HhRef.add_reference("areas")
+        areas = HhRef.references.get("areas").items_by_name  # type: ignore[union-attr]
         area_names = sorted(areas.keys(), key=lambda x: x)
         search_results = []
         for name in area_names:
-            # if str(name).lower().find(substring) > -1:
-            if str(name).find(substring) > -1:
-                search_results.append((name, areas[name]))
+            if name is None:
+                continue
+            if str(name).lower().find(substring) > -1:
+                # if str(name).find(substring) > -1:
+                if areas.get(name):
+                    search_results.append((name, areas.get(name)))
         # areas = [f"{ind + 1}. {area[0]} --- {area[1]['id']}" for ind, area in enumerate(search_results)]
         areas = [f"{area[0]} --- {area[1]['id']}" for area in search_results]
         self.user_interface.show_current_menu(info_pane=areas, show_info_pane_once=True)
@@ -238,16 +316,20 @@ class Application:
         :param parent: составная область
         """
         if not HhRef.references.get("areas"):
-            HhRef("areas", "areas")
+            HhRef.add_reference("areas")
         if not HhRef.references["areas"].item_code_is_valid(parent):
             self.user_interface.show_message(f"Регион с кодом {parent} не найден.")
             return
-        areas = HhRef.references.get("areas").all_items_dict_by_id[parent].get("areas")  # type: ignore[union-attr]
-        if areas:
-            areas = [
-                f"{area_data['name']} --- {area_id}"
-                for area_id, area_data in areas.items()
-            ]
+        child_area_ids = HhRef.references.get("areas").items_by_id[parent].get("areas")  # type: ignore[union-attr]
+        if child_area_ids:
+            areas = []
+
+            for child_id in child_area_ids:
+                child_area = HhRef.references.get("areas", {}).items_by_id.get(child_id)
+                if child_area:
+                    child_area_name = child_area.get("name")
+                    if child_area_name:
+                        areas.append(f"{child_area_name} --- {child_id}")
             area_names = sorted(areas, key=lambda x: x)
             self.user_interface.show_current_menu(
                 info_pane=area_names, show_info_pane_once=False, pause=False
@@ -262,8 +344,8 @@ class Application:
         Показать список всех регионов, упорядоченных в алфавитном порядке
         """
         if not HhRef.references.get("areas"):
-            HhRef("areas", "areas")
-        areas = HhRef.references.get("areas").all_items_dict_by_name  # type: ignore[union-attr]
+            HhRef.add_reference("areas")
+        areas = HhRef.references.get("areas").items_by_name  # type: ignore[union-attr]
         areas = [f"{name} --- {areas[name]['id']}" for name in areas.keys()]
         area_names = sorted(areas, key=lambda x: x)
         self.user_interface.show_current_menu(
@@ -274,9 +356,9 @@ class Application:
         """
         Показать список всех регионов, упорядоченных по коду
         """
-        if not HhRef.references.get("area"):
-            HhRef("areas", "areas")
-        areas = HhRef.references.get("areas").all_items_dict_by_id  # type: ignore[union-attr]
+        if not HhRef.references.get("areas"):
+            HhRef.add_reference("areas")
+        areas = HhRef.references.get("areas").items_by_id  # type: ignore[union-attr]
         areas = [f"{id} --- {areas[id]['name']}" for id in areas.keys()]
         area_names = sorted(areas, key=lambda x: int(x.split(" ")[0]))
         self.user_interface.show_current_menu(
@@ -287,34 +369,33 @@ class Application:
         """
         Показать список регионов по иерархии, начиная со стран
         """
-        areas = HhRef.references["areas"]
-        if not areas:
-            HhRef("areas", "areas")
+        if not HhRef.references["areas"]:
+            HhRef.add_reference("areas")
         areas = HhRef.references["areas"]
         areas_list = []
-        for area, area_data in areas.top_level_items_dict_by_name.items():
+        for area, area_data in areas.items_by_name.items():
             areas_list.append(f"{area} --- {area_data.get('id', '')}")
         self.user_interface.show_current_menu(
             info_pane=areas_list, pause=False, show_info_pane_once=False
         )
         # areas = sorted(areas, key=lambda x: x)
 
-    def show_all_professions_names(self) -> None:
-        """
-        Показать все отрасли / профессии
-        """
-        profs = HhRef.references.get("professional_roles")
-        if not profs:
-            HhRef("professional_roles", ["categories", "roles"])
-        profs = HhRef.references.get("professional_roles")
-        if profs:
-            prof_names = [
-                f"{name} --- {prof_data.get('id', '')}"
-                for name, prof_data in profs.all_items_dict_by_name.items()
-            ]
-            self.user_interface.show_current_menu(
-                info_pane=prof_names, show_info_pane_once=True
-            )
+    # def show_all_professions_names(self) -> None:
+    #     """
+    #     Показать все отрасли / профессии
+    #     """
+    #     profs = HhRef.references.get("professional_roles")
+    #     if not profs:
+    #         HhRef("professional_roles", ["categories", "roles"])
+    #     profs = HhRef.references.get("professional_roles")
+    #     if profs:
+    #         prof_names = [
+    #             f"{name} --- {prof_data.get('id', '')}"
+    #             for name, prof_data in profs.items_by_name.items()
+    #         ]
+    #         self.user_interface.show_current_menu(
+    #             info_pane=prof_names, show_info_pane_once=True
+    #         )
 
     def load_vacancies_from_file(
             self,
@@ -340,7 +421,9 @@ class Application:
             file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
 
             try:
-                vacancies_data = file_manager.load(conditions, fails_if_none)
+                vacancies_data = file_manager.load(
+                    conditions, fails_if_none, encoding="utf-8"
+                )
                 if vacancies_data:
                     vacancies_data = [
                         Vacancy.validate_fields(raw_item) for raw_item in vacancies_data
@@ -393,6 +476,98 @@ class Application:
 
         self.user_interface.show_message("Загрузка завершена.")
 
+    def delete_vacancies_from_file(
+            self,
+            data_dir: str,
+            filename: str,
+            filetype: str,
+            conditions: dict,
+            delete_if_none: bool = False,
+            delete_if_match: bool = True,
+    ) -> None:
+        """
+        Загрузить вакансии из файла
+        :param data_dir:    каталог загрузки
+        :param filename:    имя файла
+        :param filetype:    тип файла
+        :param conditions:  условия для фильтрации данных вакансий в файле
+        :param delete_if_none:  Если True, удалять запись в файле, если нет поля, указанного в условии
+        :param delete_if_match: Если True, удалять запись в файле, если условия удовлетворены
+        """
+        file_manager = None
+        # content = ""
+        if filetype == "1":
+            file_manager = TextFileManager(storage_name=filename, working_dir=data_dir)
+
+            try:
+                file_manager.delete(
+                    conditions, delete_if_none, delete_if_match, encoding="utf-8"
+                )
+            except FileNotFoundError:
+                self.user_interface.show_message("Указанный файл не найден")
+                return
+        elif filetype == "2":
+            pass
+            # separator = ";"
+            # if not filename.lower().endswith('.csv'):
+            #     filename += '.csv'
+            #
+            # content = separator.join(Vacancy.headers)+'\n'
+            # for vacancy in self.vacancies:
+            #     content += vacancy.as_csv(separator)
+            #     # content += '-' * 100
+            #     content += '\n'
+
+        elif filetype == "3":
+            file_manager = JSONFileManager(  # type: ignore[assignment]
+                storage_name=filename, working_dir=data_dir, method=Vacancy.to_dict
+            )
+            file_manager.filter_method = vacancy_complies  # type: ignore[union-attr]
+            try:
+                del_count = file_manager.delete(conditions, delete_if_none,
+                                                delete_if_match)  # type: ignore[assignment, union-attr]
+            except FileNotFoundError:
+                self.user_interface.show_message("Указанный файл не найден")
+                return
+            if del_count:
+                self.user_interface.show_message(f"Удалено {del_count} записей")
+            else:
+                self.user_interface.show_message(
+                    "Подходящие под условия записи в файле отсутствуют"
+                )
+        self.user_interface.show_message("Файл очищен.")
+
+    def save_vacancies_to_db(self) -> None:
+        """
+        Сохраняем вакансии и, если нужно, работодателей в базу данных
+        """
+        vac_data_list = []
+        employers_data = []
+        if not HhRef.references.get("employers"):
+            HhRef.add_reference("employers")
+        employers_ref = HhRef.references.get("employers")
+        if not employers_ref:
+            self.user_interface.show_message(
+                "Не удалось получить данные о работотдателях с сайта"
+            )
+            return
+
+        for vacancy in self.vacancies:
+            vacancy_fields = vacancy.fields()
+
+            emp_id = vacancy_fields.get("employer", {}).get("id")
+            # набираем идентификаторы о работодателях, которые должны быть (записаны) в базе данных
+            if emp_id:
+                employer_data = employers_ref.get_by_id(emp_id)
+                employer_data["id"] = emp_id
+                employers_data.append(employer_data)
+                vac_data_list.append(vacancy_fields)
+        failed_employers: list[str] = []
+        self.db_manager.insert_employer_data(
+            employers_data, failed_employers, allow_without_vacancies=True
+        )
+        self.db_manager.insert_vacancies_data(vac_data_list, failed_employers)
+
     def check_out_user_response(self) -> None:
         """
         анализ пользовательского ввода - выполнение выбранных пользователем команд
@@ -400,7 +575,6 @@ class Application:
         user_response = self.user_interface.user_response()
         if user_response:
             action = user_response.get("action")
-            # additional_request = user_response.get('additional request')
             # -----------------------------------------------------------------------------------------------------
             if action == "load vacancies from file":
                 data_dir = user_response.get("dir")
@@ -413,13 +587,31 @@ class Application:
                 fails_if_none = user_response.get("fails if none", False)
                 all_data_set = data_dir and filename and filetype
                 if all_data_set:
+                    if len(self.vacancies):
+                        self.user_interface.ask_vacancies_list_not_empty_when_searching_anew()
+                        if user_response.get("clear vacancies list", True):
+                            self.vacancies = []
                     self.load_vacancies_from_file(
                         data_dir, filename, filetype, conditions, fails_if_none
                     )
-                # else:
-                #     self.user_interface.show_message('Введенных данных не достаточно для продолжения этой операции')
-                #     self.user_interface.return_to_main_menu()
-
+            # -----------------------------------------------------------------------------------------------------
+            if action == "delete vacancies from file":
+                data_dir = user_response.get("dir")
+                filename = user_response.get("filename")
+                filetype = user_response.get("filetype")
+                conditions = self.search_params.fields()
+                delete_if_none = user_response.get("delete_if_none", False)
+                delete_if_match = user_response.get("delete_if_match", False)
+                all_data_set = data_dir and filename and filetype
+                if all_data_set:
+                    self.delete_vacancies_from_file(
+                        data_dir,
+                        filename,
+                        filetype,
+                        conditions,
+                        delete_if_none,
+                        delete_if_match,
+                    )
             # -----------------------------------------------------------------------------------------------------
             elif action == "show vacancies list":
                 self.user_interface.show_current_menu(
@@ -445,6 +637,7 @@ class Application:
                     self.user_interface.ask_vacancies_list_not_empty_when_searching_anew()
                 self.user_interface.show_message("Ищем...", pause=False)
                 self.find_vacancies(user_response.get("clear vacancies list", True))
+
             # -----------------------------------------------------------------------------------------------------
             elif action == "search area by substring":
                 substring = user_response.get("substring")
@@ -455,6 +648,9 @@ class Application:
                 search_substring = user_response.get("substring")
                 if search_substring:
                     self.search_params.set_property("text", value=search_substring)
+                    self.user_interface.show_current_menu(
+                        info_pane=str(self.search_params)
+                    )
                     # if search_substring:
                     #     print('1. Искать введенную строку везде')
                     #     print('2. Указать поле поиска')
@@ -542,16 +738,115 @@ class Application:
             elif action == "set prof id":
                 pass
                 # prof_id = user_response.get("Prof_id")
-
-            elif action == "show all professions sorted by name":
-                self.show_all_professions_names()
-
+            # -----------------------------------------------------------------------------------------------------
+            # elif action == "show all professions sorted by name":
+            #     self.show_all_professions_names()
+            # -----------------------------------------------------------------------------------------------------
             elif action == "reset search parameters":
                 del self.search_params
                 self.search_params = SearchParameters()
                 # self.search_params.reset()
                 self.user_interface.default_info_pane = str(self.search_params)
-                self.user_interface.show_current_menu(info_pane='default')
+                self.user_interface.show_current_menu(info_pane="default")
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "work with db connection":
+                self.user_interface.set_current_menu("db_menu")
+                # self.db_manager.connect()
+                self.user_interface.show_current_menu(
+                    info_pane=self.db_connection_settings()
+                )
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "connect to db":
+                dbname = user_response.get("dbname")
+                self.db_manager.connection_settings = {
+                    "host": user_response.get("host"),
+                    "port": user_response.get("port"),
+                    "user": user_response.get("user"),
+                    "password": user_response.get("password"),
+                    "dbname": dbname,
+                }
+                self.connect_to_db()
+                #     self.user_interface.show_current_menu(info_pane=str(self.db_manager))
+                # except psycopg2.OperationalError:
+                #     self.user_interface.show_message('Подключиться к базе данных не удалось. ' +
+                #                                      'Возможно, она не существует.')
+                #     self.user_interface.shrink_db_menu()
+                # else:
+                #     if self.db_manager.connected():
+                #         self.user_interface.extend_db_menu(len(self.vacancies) > 0)
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "create db":
+                self.db_manager.connection_settings = {
+                    "host": user_response.get("host"),
+                    "port": user_response.get("port"),
+                    "user": user_response.get("user"),
+                    "dbname": user_response.get("dbname"),
+                    "password": user_response.get("password"),
+                    "rootpass": user_response.get("rootpass"),
+                }
+                self.db_manager.create_db()
+                if self.db_manager.error_message:
+                    self.user_interface.show_message(self.db_manager.error_message)
+                else:
+                    self.user_interface.extend_db_menu(len(self.vacancies) > 0)
+                    self.user_interface.show_current_menu(
+                        info_pane=str(self.db_manager)
+                    )
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "get employers data":
+                self.load_employers_data()
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "show employers and vacancies count":
+                employers_data = self.db_manager.get_companies_and_vacancies_count()
+                self.user_interface.show_current_menu(
+                    info_pane=employers_data, show_info_pane_once=True
+                )
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "save vacancies to db":
+                self.save_vacancies_to_db()
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "save connection settings to file":
+                filename = user_response.get("filename")
+                dir = user_response.get("dir")
+                with open(os.path.join(dir, filename), "w", encoding="utf-8") as f:
+                    json.dump(self.db_manager.connection_settings, f)
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "load connection settings from file":
+                self.load_db_connection_settings_from_file(
+                    user_response.get("filename"), user_response.get("dir")
+                )
+                self.connect_to_db()
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "show all vacancies":
+                vacancies_from_db = self.db_manager.get_all_vacancies()
+                if len(vacancies_from_db):
+                    self.user_interface.show_current_menu(
+                        info_pane=vacancies_from_db, show_info_pane_once=True
+                    )
+            # -----------------------------------------------------------------------------------------------------
+            elif action == "show average salary in db":
+                average_salary = self.db_manager.get_avg_salary()
+                self.user_interface.show_message(f"Средняя зарплата: {average_salary}")
+            # -----------------------------------------------------------------------------------------------------
+            # elif action == "show vacancies with salary higher than average":
+            #     vacancies_from_db = self.db_manager.get_vacancies_with_higher_salary()
+            #     if len(vacancies_from_db):
+            #         self.user_interface.show_current_menu(
+            #             info_pane=vacancies_from_db, show_info_pane_once=True
+            #         )
+            # -----------------------------------------------------------------------------------------------------
+            # elif action == "show vacancies with keywords":
+            # keywords_str = user_response.get("keywords")
+            # separator = user_response.get("separator")
+            # if keywords_str:
+            #     vacancies_from_db = self.db_manager.get_vacancies_with_keyword(
+            #         keywords_str, separator
+            #     )
+            #     if len(vacancies_from_db):
+            #         self.user_interface.show_current_menu(
+            #             info_pane=vacancies_from_db, show_info_pane_once=True
+            #         )
+            # -----------------------------------------------------------------------------------------------------
 
         self.user_interface.clear_user_response()
 
